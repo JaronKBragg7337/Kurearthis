@@ -6,23 +6,31 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 
 ## Current state
 - **Project:** Kurearthis
-- **Unreal status:** Planetary proof 1 complete; `PlanetaryProof` contains one rounded-Earth-mean-radius spherical body at world origin; `Foundation` remains the control map
+- **Unreal status:** Planetary proof 1 complete and `ProofEarth` now has verified usable surface collision; `PlanetaryProof` holds one rounded-Earth-mean-radius body at world origin; `Foundation` remains the control map
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
-- **Git status:** Clean — single-body scale proof committed
-- **Last verified good state:** `PlanetaryProof` saved and reopened with exactly one actor, `ProofEarth`; computed radius `637,100,105.034 cm`
-- **Current builder:** Codex
+- **Git status:** Clean — surface collision proof committed
+- **Last verified good state:** Live editor audit of `PlanetaryProof` = exactly 1 actor `ProofEarth` at origin, scale 6371; a simple radial north-pole line trace blocks on it with impact normal `(0,0,1)` at radius `~637,100,672 cm`
+- **Current builder:** Claude
 - **Active blockers:** None
 
 ## Known issues
-- Surface collision, local reference frame, radial gravity, and player behavior are not yet proven; `ProofEarth` is currently a visual static mesh only.
+- Local reference frame, radial gravity, and player behavior are not yet proven; `ProofEarth` is now a collidable static mesh but nothing stands on it yet.
+- Collision/trace impact results are float32: at ~6.37e8 cm the ULP is tens of cm, so trace hit points carry sub-meter-to-few-meter scatter (impact `637,100,672` vs proof-1 bounds `637,100,105`). Acceptable for representation/collision; keep in mind for gravity and movement math.
 - `Foundation` is intentionally flat and must remain a control map, not become the game-world architecture.
 
 ## Next up
-1. Add usable surface collision to `ProofEarth` without adding a pawn.
-2. Verify a radial line trace from above the north pole hits at the documented radius and record the measured hit location.
-3. Only after collision is proven, add a minimal radial-gravity test pawn as a separate chunk.
+1. Add a minimal radial-gravity test pawn as a separate chunk: spawn a physics body above the north pole and prove it falls toward planet center and rests on the surface.
+2. Then prove a correct local up direction for a controlled pawn (surface stand + orientation), still in `PlanetaryProof`.
+3. Defer atmosphere/space transition (proof 3) and the second body (proof 4) until gravity + local up are proven.
 
 ## Recent entries
+
+### 2026-06-20 — Builder: Claude
+- Did: Connected to the live Unreal editor, audited the in-memory `PlanetaryProof` scene (matched the log: 1 actor `ProofEarth` at origin, scale 6371 — no divergence), then gave `ProofEarth` usable surface collision by setting the planet mesh body setup to Use Complex Collision As Simple and confirming the actor component blocks queries (`BlockAll`, `QueryAndPhysics`)
+- Verified: A simple (non-complex) downward radial line trace from 500 km above the north pole returns `blocking_hit=True` on the ProofEarth StaticMeshActor with impact normal `(0,0,1)` and impact point z `637,100,672 cm`; recorded full result in `Saved/CollisionProofAudit.json`. Because a simple trace blocks, the surface is walkable collision, not just a render mesh
+- Files changed: `Content/Planetary/SM_ProofPlanet_Base.uasset`, `Content/PlanetaryProof.umap`, `_authoring/add_verify_surface_collision.py`, `_authoring/live_scene_audit.py`, `BUILDLOG.md`
+- Notes: No pawn was added (kept to one chunk). Collision queries return float32 positions; at planetary scale that is tens-of-cm precision, so the ~567 cm gap vs the proof-1 bounds radius is expected float scatter, recorded not hidden. Editor Python was driven through the live editor console (remote execution is disabled); the throwaway HitResult probe was deleted
+- Next: Add a minimal radial-gravity test pawn that falls toward planet center and rests on the surface, as a separate verified chunk
 
 ### 2026-06-20 — Builder: Codex
 - Did: Authored and imported one reproducible in-house sphere, created `PlanetaryProof`, and placed the sole `ProofEarth` actor at world origin with a documented rounded-Earth-mean target radius of 6,371,000 m
