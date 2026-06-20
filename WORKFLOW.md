@@ -22,6 +22,17 @@ Then stop new feature work and resolve the mismatch first.
 
 This step exists because a crashed session can leave ghost actors in Unreal with no log entry. Those ghosts cause bugs that no future session can diagnose from the log alone.
 
+## Active architecture proof order
+Until the planetary foundation milestone in `CHARTER.md` is complete, work in this order:
+1. Create one spherical body at a deliberate, documented scale.
+2. Prove radial gravity and the player's local up direction on that body.
+3. Prove the visible surface-to-atmosphere-to-dark-space transition.
+4. Add a second distant body and prove both coexist in the same world model.
+
+Treat each numbered proof as one or more small, independently verified chunks. Do not skip ahead, and do not start economy, plot ownership, object placement, procedural galaxy, or orbital simulation work during these proofs.
+
+`Foundation` remains a control map only. Planetary proof work should live in a dedicated map so the known-good control scene stays available for comparison.
+
 ## Build loop
 1. Do ONE coherent, small chunk only.
 2. Save the Unreal project.
@@ -72,6 +83,7 @@ Claude and Codex share state ONLY through committed files. Do not assume context
 Jaron tests what the AI cannot reliably know:
 - movement feel
 - visual read
+- whether surface, atmosphere, and space read as one continuous world
 - interaction feel
 - whether it actually works in play
 

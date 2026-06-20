@@ -1,21 +1,30 @@
 # CHARTER — project law
 
-Read this before doing anything. These rules do not change between sessions.
+Read this before doing anything. These rules persist between sessions and may only be amended by explicit direction from Jaron.
 
 ## Core law
 Build the smallest real playable foundation first. Earn complexity through working layers.
 
-## Scope law
-Do not start with space spectacle, planets, moons, orbital systems, or giant simulation architecture. Those come later, after the grounded foundation is real and testable.
+## Planetary truth law
+The game's foundational truth is planetary: a player can stand on a spherical body, use that body's local gravity and up direction, leave its atmosphere for dark space, and coexist with another body in the same world model. Prove this architecture before building gameplay systems that assume a flat world.
 
 ## First target
-One small real place, one player, one simple economy action, one owned plot, one placed object. That is the entire first milestone. Nothing else.
+The first milestone is a minimal planetary reality proof, completed in separate verified chunks:
+1. One spherical body exists at a deliberate, documented scale.
+2. A player stands and moves on it using radial gravity and a correct local up direction.
+3. Travel from the surface to altitude visibly transitions from atmosphere to dark space.
+4. A second body coexists at distance without breaking the first body's frame, gravity, or rendering assumptions.
+
+Do not combine all four proofs into one giant task. Do not add economy, owned plots, placement systems, procedural galaxies, or orbital simulation until these architectural truths are proven.
+
+## Control-map law
+`Foundation` is a small flat control map for confirming that the Unreal project opens and runs. It is not the game-world architecture and must not be used as evidence that flat-world assumptions are acceptable.
 
 ## Reality law
 No fake demo logic when a real implementation is practical. Use data-driven systems, real units, and forward-compatible structure. Do not build disposable placeholder layers.
 
 ## Growth law
-Hold the full long-term vision privately. Only build the next smallest real thing. No giant architecture before proof of the smaller thing working.
+Hold the full long-term vision privately. Build only the next smallest planetary proof, verify it, and then earn the next layer. Planetary-first does not authorize a giant solar-system architecture before the smaller proofs work.
 
 ## Transparency law
 This project is built by AI agents (Claude and Codex) working with Jaron. Do not present that as if Jaron manually authored everything. Use honest attribution in all commits and log entries.
