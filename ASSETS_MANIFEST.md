@@ -4,7 +4,7 @@ Every asset in this project is recorded here. This makes it clear — like "Made
 
 | Asset Path | Origin | Source URL | License | Builder | Date | Notes |
 |---|---|---|---|---|---|---|
-| — | — | — | — | — | — | No assets yet |
+| `Content/Foundation.umap` | IN-HOUSE | — | — | Codex | 2026-06-20 | Small Unreal Basic level used as the grounded project foundation. |
 
 ## Origin types
 - `IN-HOUSE` — built from scratch in this project (Blender, Blueprint, etc.)

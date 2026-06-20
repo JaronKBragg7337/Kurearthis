@@ -6,22 +6,29 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 
 ## Current state
 - **Project:** Kurearthis
-- **Unreal status:** New project, not yet started
+- **Unreal status:** Unreal Engine 5.8 project created; `Foundation` is the startup map
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
-- **Git status:** Clean — kit files committed, no Unreal work yet
-- **Last verified good state:** N/A — project not yet opened
-- **Current builder:** None yet
+- **Git status:** Clean — project foundation committed
+- **Last verified good state:** `Content/Foundation.umap` open and saved with 8 actors
+- **Current builder:** Codex
 - **Active blockers:** None
 
 ## Known issues
 - None yet
 
 ## Next up
-1. Jaron creates the Unreal project and pastes `PASTE_INTO_NEW_CHAT.txt` to start the first session.
-2. First session: connect to Unreal, verify empty scene, begin the first tiny playable slice (one place, one player, one simple action).
+1. Add one grounded controllable player to `Foundation` and verify movement in Play-in-Editor.
+2. Add one simple economy action only after player movement is verified.
 3. Do NOT begin space/planet work yet. Stay grounded per `CHARTER.md`.
 
 ## Recent entries
+
+### 2026-06-20 — Builder: Codex
+- Did: Created the Unreal Engine 5.8 project scaffold and saved a small Basic level as `Content/Foundation.umap`; set it as the editor and game startup map
+- Verified: Unreal Python actor audit reported exactly 8 actors: Floor, PlayerStart, DirectionalLight, SkyLight, SkyAtmosphere, ExponentialHeightFog, VolumetricCloud, and SM_SkySphere; level save confirmed on disk
+- Files changed: `Kurearthis.uproject`, `.gitignore`, `Config/DefaultEngine.ini`, `Config/DefaultGame.ini`, `Config/DefaultInput.ini`, `Content/Foundation.umap`, `ASSETS_MANIFEST.md`, `BUILDLOG.md`
+- Notes: Initial bare project opened Unreal's unsaved 138-actor Open World template; it was audited, not saved, and replaced with the small Basic level. Local checkout was missing at session start and was restored from the public GitHub remote. No live/log divergence was found before work began.
+- Next: Add one grounded controllable player to `Foundation` and verify movement in Play-in-Editor
 
 ### 2026-06-20 — Builder: Perplexity (kit setup)
 - Did: Created GitHub repo Kurearthis, pushed full project kit
