@@ -1,0 +1,18 @@
+# Unreal Engine
+Intermediate/
+Saved/
+DerivedDataCache/
+Binaries/
+.vs/
+*.VC.db
+*.VC.opendb
+
+# Claude / Codex agent scratch
+.claude/
+_authoring/*.fbx
+_authoring/*.log
+_*.png
+
+# OS
+.DS_Store
+Thumbs.db

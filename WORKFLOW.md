@@ -1,0 +1,92 @@
+# WORKFLOW — how Claude, Codex, and Jaron operate
+
+Read `CHARTER.md` first.
+
+## Session start order
+1. Read `CHARTER.md`
+2. Read `WORKFLOW.md`
+3. Read `BUILDLOG.md`
+4. Connect to Unreal
+5. Verify live scene vs log (see below)
+
+## Live scene verification (mandatory before new work)
+Before trusting the log, enumerate key scene actors and compare against what BUILDLOG.md says should exist.
+
+If live state and log match — continue.
+
+If they do not match, write:
+```
+STATE DIVERGENCE — [what you found] vs [what log says]
+```
+Then stop new feature work and resolve the mismatch first.
+
+This step exists because a crashed session can leave ghost actors in Unreal with no log entry. Those ghosts cause bugs that no future session can diagnose from the log alone.
+
+## Build loop
+1. Do ONE coherent, small chunk only.
+2. Save the Unreal project.
+3. Verify with evidence: trace, capture, compile result, or Jaron playtest.
+4. Append a short BUILDLOG entry (see format below).
+5. Commit and push with honest builder attribution.
+6. Stop at a clean handoff point.
+
+## BUILDLOG entry format
+```
+### YYYY-MM-DD — Builder: [Claude | Codex]
+- Did: [what was built]
+- Verified: [how it was confirmed]
+- Files changed: [key paths]
+- Notes: [gotchas, decisions, warnings]
+- Next: [exact next step]
+```
+
+## Incomplete session rule
+If approaching a usage limit before finishing, write this BEFORE stopping:
+```
+SESSION INCOMPLETE — stopped during [task]; next action is [exact step]
+```
+Commit and push that entry before the session ends.
+
+## Log rotation rule
+BUILDLOG.md holds only:
+- Current state block
+- Known issues
+- Last 10 entries max
+- Next up list
+
+Anything older moves to `BUILDLOG_ARCHIVE.md`. This keeps session startup cheap and prevents the log from becoming a token drain.
+
+## Commit rules
+- Commit after each coherent chunk.
+- Commit BEFORE risky destructive changes too (creates a rollback point).
+- Commit attribution trailers:
+  - Claude: `Co-Authored-By: Claude <noreply@anthropic.com>`
+  - Codex: `Co-Authored-By: Codex <noreply@openai.com>`
+- Never commit secrets, personal data, or anything private.
+- Repo is PUBLIC. The name must not hint at the game's space arc.
+
+## Cross-agent rule
+Claude and Codex share state ONLY through committed files. Do not assume context from prior chats. Do not treat uncommitted work as real.
+
+## Jaron's test loop
+Jaron tests what the AI cannot reliably know:
+- movement feel
+- visual read
+- interaction feel
+- whether it actually works in play
+
+Ask Jaron to test anything that requires human eyes or a controller.
+
+## Asset tracking
+Whenever an asset is added or changed, update `ASSETS_MANIFEST.md`:
+- asset path
+- IN-HOUSE or OPEN-SOURCE
+- source URL + license if open-source
+- builder
+- date
+
+## Pipeline (proven in prior project — reuse it)
+- Model geometry in Blender headless (`blender --background --python _authoring/make_*.py`)
+- Export FBX (not glb), model in METERS
+- Import via `StaticMeshTools.import_file`
+- Game logic via Blueprint; data-driven where possible

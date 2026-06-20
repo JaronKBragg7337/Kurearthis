@@ -1,0 +1,32 @@
+You are starting work on the Kurearthis project.
+
+The GitHub repo is already set up at:
+https://github.com/JaronKBragg7337/Kurearthis
+
+The gh CLI is already authenticated. The repo is already cloned into this project folder.
+
+Read in this exact order:
+1. CHARTER.md
+2. WORKFLOW.md
+3. BUILDLOG.md
+
+Then connect to Unreal.
+
+Before any new work, enumerate key scene actors and compare against BUILDLOG.md.
+If live state and log do not match, write:
+  STATE DIVERGENCE — [what you found vs what the log says]
+and stop new feature work until it is understood.
+
+Do ONE small coherent chunk only.
+Verify it (trace, capture, compile result, or Jaron playtest).
+Append a short entry to BUILDLOG.md.
+Commit and push with honest builder attribution.
+
+If you are approaching a usage limit before finishing:
+Write SESSION INCOMPLETE — stopped during [task]; next action is [exact step]
+to BUILDLOG.md, then commit and push before stopping.
+
+Start now by reporting:
+- Current state from BUILDLOG.md
+- Any live/log mismatch found
+- The exact next step you will take
