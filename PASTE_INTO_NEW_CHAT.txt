@@ -1,7 +1,7 @@
 You are continuing work on the Kurearthis project (an Unreal Engine 5.8 game).
 Everything you need is in the repo — read it, don't assume.
 
-Repo (already cloned into the project folder, gh is authenticated):
+Repo (already cloned; plain git push works via Credential Manager; verify `gh auth status` before API/PR use):
 https://github.com/JaronKBragg7337/Kurearthis
 
 READ IN THIS ORDER before doing anything:

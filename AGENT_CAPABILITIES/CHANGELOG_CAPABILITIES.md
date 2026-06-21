@@ -22,6 +22,9 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 - Gotcha: already-running agent apps do not inherit Scoop's newly written
   `TESSDATA_PREFIX`; restart or refresh from the user environment. The smoke test
   automatically uses Scoop's language-data path when needed.
+- Capability-state correction: plain git push works, but live `gh auth status`
+  reports no authenticated hosts. Prior `gh` authentication did not persist;
+  future sessions must verify before relying on PR/API commands.
 - Source: live install, version checks, generated round-trip artifacts under
   `Saved/CapabilityTests/document_stack/` (gitignored).
 

@@ -34,7 +34,7 @@ No Unreal Engine MCP is needed for the proven workflow. The live editor is contr
 ## Tooling
 - Blender 5.1.2 (headless CLI authoring) — NOT on PATH, full path required
 - Git 2.54.0 — push/pull work via Windows Credential Manager (HTTPS)
-- `gh` 2.93.0 — **authenticated** as JaronKBragg7337 (PRs/issues/api available). Push/pull still use plain `git`.
+- `gh` 2.93.0 — installed but currently unauthenticated; push/pull still work through plain `git`.
 - C++ build: VS Build Tools 2022 (MSVC 14.44) + .NET Framework 4.8.1 SDK
 - Package/runtime coverage: Scoop; Go 1.26.4; Rust 1.96.0; Java 21 LTS; Git LFS 3.7.1
 - Document inspection: Tesseract OCR (163 models), Poppler, qpdf, Ghostscript, ExifTool

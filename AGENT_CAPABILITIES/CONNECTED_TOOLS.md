@@ -48,9 +48,13 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 - **Best pattern:** plain `git add/commit/push`. Attribution trailers per WORKFLOW. Rebase onto `origin/main` before pushing (other agents push too).
 
 ## GitHub CLI (gh)
-- **Status:** Installed (2.93.0) and **authenticated** as `JaronKBragg7337` (keyring, verified `gh api user` 2026-06-20). [MACHINE]
-- **What it can do:** create/manage PRs, issues, `gh api`, releases. Repo push/pull still goes through plain `git` (credential manager).
-- **Note:** auth is stored on the machine, so it applies to any agent on this PC (verify with `gh auth status`).
+- **Status:** Installed (2.93.0) but **not authenticated** as of the live Codex
+  check on 2026-06-21. A prior Claude session authenticated it, but that state
+  did not persist.
+- **When authenticated:** create/manage PRs, issues, `gh api`, releases.
+- **Current path:** repo push/pull still works through plain `git` and Windows
+  Credential Manager. Run `gh auth login` with Jaron's browser approval when an
+  API/PR workflow actually needs it; always verify with `gh auth status`.
 
 ## winget (dependency installs)
 - **Status:** Active — used to install the .NET Framework 4.8.1 SDK this session

@@ -12,7 +12,7 @@ including ones not yet integrated. Check here before assuming a capability is im
 |---|---|---|
 | Unreal Engine 5.8 | Game editor / live scene; driven via Python console + GUI automation | Must be open for editor scripting; closed for C++ builds |
 | VS Build Tools 2022 + .NET 4.8.1 SDK | Compile the UE C++ module | Proven this session |
-| Git | Version control (HTTPS via Credential Manager) | Use plain `git`; `gh` is also authenticated |
+| Git | Version control (HTTPS via Credential Manager) | Plain `git` push/pull works; independent of `gh` auth |
 | winget | Install dependencies | Jaron approves UAC |
 | Blender 5.1.2 | Headless geometry authoring, FBX export | CLI only; full path needed |
 | Tesseract + Poppler + qpdf + Ghostscript + ExifTool | OCR, PDF extraction/render/validation, metadata inspection | Proven by `_authoring/document_stack_smoketest.py` |
@@ -24,7 +24,7 @@ including ones not yet integrated. Check here before assuming a capability is im
 | VS Code | Editing, extensions, integrated tooling | Installed (`code` on PATH) |
 | Node.js v24 / npm 11 | JS tooling, MCP servers, scripts | Installed |
 | Python 3.12 / 3.14 | Scripting/automation outside Blender | Installed |
-| GitHub CLI `gh` 2.93.0 | PRs/issues/api | **Authenticated** (JaronKBragg7337) |
+| GitHub CLI `gh` 2.93.0 | PRs/issues/api | Installed, currently **not authenticated**; run `gh auth login` when needed |
 | Scoop | Per-user CLI/app installation without UAC for available packages | Active; main/extras/versions/java buckets |
 | Go, Rust, Java 21, Git LFS | Cross-project builds and large-file support | Installed and on PATH |
 

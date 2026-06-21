@@ -30,7 +30,7 @@ Do not trust this file blindly — verify live before relying on entries older t
 | .NET Framework **4.8.1 SDK** | `C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8.1` (installed this session via winget; required by UE C++ build) | 2026-06-20 OK |
 | Blender | **5.1.2** — `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe` (NOT on PATH) | 2026-06-20 OK |
 | Git | 2.54.0 — HTTPS remote via Windows **Credential Manager** (`credential.helper=manager`) | 2026-06-20 OK |
-| GitHub CLI `gh` | 2.93.0 — **authenticated** as `JaronKBragg7337` (keyring); `gh api user` works. PRs/issues/api available. | 2026-06-20 OK |
+| GitHub CLI `gh` | 2.93.0 — installed but **not authenticated** (`gh auth status`, 2026-06-21). Plain git push works via Credential Manager. | 2026-06-21 LIVE |
 | Node.js / npm | node v24.16.0 / npm 11.13.0 | 2026-06-20 OK |
 | Python | system `python` = 3.12.10; `py` launcher default 3.14 (`...\pythoncore-3.14-64`) | 2026-06-20 OK |
 | VS Code | `%LOCALAPPDATA%\Programs\Microsoft VS Code` (`code` on PATH) | 2026-06-20 OK |
@@ -62,7 +62,7 @@ Do not trust this file blindly — verify live before relying on entries older t
   GUI automation only when a workflow cannot be driven remotely.
 
 ## Re-verify checklist for the next session
-1. `git --version`, `gh auth status` (still authenticated?), `node --version`, `python --version`
+1. `git --version`, `gh auth status` (currently unauthenticated), `node --version`, `python --version`
 2. Blender path still `Blender 5.1`? `& "<path>" --version`
 3. `docker info` — daemon running yet?
 4. UE engine path still `UE_5.8`?

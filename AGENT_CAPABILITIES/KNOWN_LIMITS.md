@@ -19,8 +19,12 @@ If you hit a hard limit, document it here so the next session does not repeat th
 - **What happened:** seed files assumed an "Unreal Engine MCP" was active. None was loaded in the Claude session.
 - **Rule (Claude):** drive the editor via its Python console + GUI automation. **Codex:** session-specific — check your own loaded tools; don't infer yours from Claude's.
 
-## ~~gh CLI not authenticated~~ → RESOLVED 2026-06-20 [MACHINE]
-- Was not logged in; **now authenticated** as JaronKBragg7337 (keyring). `gh api/pr/issue` work. Kept as history only.
+## gh CLI authentication does not reliably persist (VERIFIED 2026-06-21)
+- Claude authenticated `gh` on 2026-06-20, but Codex's live
+  `gh auth status` on 2026-06-21 reported no logged-in hosts.
+- **Rule:** verify before API/PR use. Plain git push/pull remains functional via
+  Windows Credential Manager; run `gh auth login` with Jaron's browser approval
+  only when a `gh` workflow is needed.
 
 ## [CLAUDE-ENV] Windows-MCP Click/Type `loc` is buggy (VERIFIED 2026-06-20)
 - **What happened:** passing `loc=[x,y]` fails pydantic validation (serialized to a string) in Claude's Windows-MCP bridge.

@@ -11,7 +11,7 @@ Anything that could change what's possible belongs here.
 | Item | Reality / fix |
 |---|---|
 | "Unreal Engine MCP now available/active" | [CLAUDE-ENV] **Not loaded for Claude** — editor driven via console + GUI. Agent/session-specific; Codex checks its own. |
-| "gh confirmed authenticated" | Was NOT authed → **FIXED**: now logged in as JaronKBragg7337 (machine keyring). |
+| "gh confirmed authenticated" | Authentication was fixed on 2026-06-20 but had lapsed by Codex's 2026-06-21 check. Plain git still works; always run `gh auth status`. |
 | "Docker installed" | Was daemon-off → **FIXED**: Docker Desktop started, daemon up (29.5.3). |
 | "Codex environment parity unknown" | **PARTIALLY RESOLVED:** Codex verified filesystem/shell, remote Unreal execution, Scoop, Go/Rust/Java/Git LFS, visual file inspection, and the OCR/PDF stack. MCP/app availability remains session-specific. |
 
