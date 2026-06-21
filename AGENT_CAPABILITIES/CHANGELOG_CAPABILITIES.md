@@ -8,6 +8,13 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 
 ---
 
+## 2026-06-21 — Capability #5: headless visual capture (Claude)
+- Changed by: Claude
+- Now POSSIBLE: capture a PNG of the live editor scene with NO GUI — `python _authoring/capture_view.py` (wraps `_authoring/capture_scene.py`). It renders the active viewport camera off-screen via `SceneCapture2D` → render target → PNG, so it works even when the editor window is minimized (an on-screen `HighResShot` does not). The agent reads the PNG to actually see the scene — visual evidence on every chunk instead of relying on Jaron's eyes for geometry checks.
+- Verified: captured `PlanetaryProof`; the Earth-scale `ProofEarth` sphere renders against black space.
+- Gotchas found: render target must be `RTF_RGBA8` (a float format exports OpenEXR under a .png name); proof maps are unlit so the script adds + removes temporary lights for the shot.
+- Source: live runs 2026-06-21.
+
 ## 2026-06-21 — Asset-production toolkit installed (Claude)
 - Changed by: Claude (Jaron requested; approved UAC where prompted)
 - Now POSSIBLE — the agent can produce real assets from scripts, not just placeholders:
