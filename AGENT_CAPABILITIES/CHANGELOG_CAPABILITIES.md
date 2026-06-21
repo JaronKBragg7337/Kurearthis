@@ -8,6 +8,12 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 
 ---
 
+## 2026-06-20 — Fixed gh + Docker; scoped agent-specific facts (Claude)
+- Changed by: Claude (Jaron approved the gh browser authorization)
+- Now POSSIBLE: `gh` is authenticated (JaronKBragg7337) → PRs/issues/`gh api` work; Docker daemon is running (29.5.3). Both were "not finished setup," not real blockers.
+- Clarified SCOPE across the capability files: machine-level facts (installed software, versions, gh/docker/git state, engine physics behavior) apply to any agent on this PC including Codex; items tagged **[CLAUDE-ENV]** (which MCP servers were loaded, the Windows-MCP `loc` bug, "no Unreal MCP") are Claude-session-specific — Codex must verify its own loaded tools and not treat these as universal.
+- Source: live verification (`gh api user`, `docker info`).
+
 ## 2026-06-20 — Registry verified against the live machine (Claude)
 - Changed by: Claude
 - What is now confirmed POSSIBLE (verified live):

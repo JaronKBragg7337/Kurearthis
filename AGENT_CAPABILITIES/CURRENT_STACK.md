@@ -14,9 +14,9 @@ Update whenever a tool is added, removed, or changes status.
 | Codex (OpenAI) | Secondary builder — code and handoff work | OpenAI Codex interface | Active (env may differ; verify) |
 | Perplexity AI | Research, planning, repo/folder management | Web interface | Active |
 
-## How Unreal is actually driven (CORRECTED 2026-06-20)
-There is **no Unreal Engine MCP** in the Claude environment. The live editor is
-controlled by:
+## How Unreal is actually driven — [CLAUDE-ENV] (CORRECTED 2026-06-20)
+No Unreal Engine MCP was loaded in this **Claude** session (Codex may differ —
+check your own tools). The live editor is controlled by:
 | Mechanism | What it does | Status |
 |---|---|---|
 | Editor **Python console** (`py "abs/path.py"`) | Run authoring/audit/test scripts in the live editor; results written to `Saved/` and `Saved/Logs/Kurearthis.log` | Active, proven |
@@ -35,8 +35,7 @@ controlled by:
 ## Tooling
 - Blender 5.1.2 (headless CLI authoring) — NOT on PATH, full path required
 - Git 2.54.0 — push/pull work via Windows Credential Manager (HTTPS)
-- `gh` 2.93.0 — installed but **NOT authenticated**; use plain `git` for push/pull.
-  `gh`-specific commands (PRs/issues) need `gh auth login` or GH_TOKEN first.
+- `gh` 2.93.0 — **authenticated** as JaronKBragg7337 (PRs/issues/api available). Push/pull still use plain `git`.
 - C++ build: VS Build Tools 2022 (MSVC 14.44) + .NET Framework 4.8.1 SDK
 
 ## Version control

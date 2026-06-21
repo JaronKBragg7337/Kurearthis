@@ -6,9 +6,11 @@ This file records what is ACTUALLY on the machine — not assumed, not guessed.
 Update this file whenever you discover, install, or confirm anything on the system.
 Do not trust this file blindly — verify live before relying on entries older than one week.
 
-> Note: "verified" entries below were run live in the Claude Code environment on
-> the date shown. Codex may run in a different environment — it should verify
-> independently and not assume parity.
+> SCOPE: Installed software, versions, paths, and the gh/docker/git state below
+> are **machine-level** — they apply to any agent on this PC, Codex included.
+> What differs per agent is which **MCP tools/servers are loaded in a given
+> session** (see the MCP notes in LOCAL_APPS_AND_SERVICES.md / CONNECTED_TOOLS.md
+> marked [CLAUDE-ENV]); Codex must check its own loaded tools, not assume Claude's.
 
 ---
 
@@ -28,19 +30,21 @@ Do not trust this file blindly — verify live before relying on entries older t
 | .NET Framework **4.8.1 SDK** | `C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8.1` (installed this session via winget; required by UE C++ build) | 2026-06-20 OK |
 | Blender | **5.1.2** — `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe` (NOT on PATH) | 2026-06-20 OK |
 | Git | 2.54.0 — HTTPS remote via Windows **Credential Manager** (`credential.helper=manager`) | 2026-06-20 OK |
-| GitHub CLI `gh` | 2.93.0 installed — **NOT authenticated** (`gh auth status` = not logged in; no GH_TOKEN). See CONNECTED_TOOLS. | 2026-06-20 OK |
+| GitHub CLI `gh` | 2.93.0 — **authenticated** as `JaronKBragg7337` (keyring); `gh api user` works. PRs/issues/api available. | 2026-06-20 OK |
 | Node.js / npm | node v24.16.0 / npm 11.13.0 | 2026-06-20 OK |
 | Python | system `python` = 3.12.10; `py` launcher default 3.14 (`...\pythoncore-3.14-64`) | 2026-06-20 OK |
 | VS Code | `%LOCALAPPDATA%\Programs\Microsoft VS Code` (`code` on PATH) | 2026-06-20 OK |
-| Docker | CLI 29.5.3 installed — **daemon NOT running** (Docker Desktop not started) | 2026-06-20 OK |
+| Docker | CLI 29.5.3 — **daemon running** (Docker Desktop started this session; `docker info` OK) | 2026-06-20 OK |
 | winget | 1.28.240 — works; can install deps (Jaron approves UAC prompts) | 2026-06-20 OK |
 
 ## NOT present / corrected assumptions
 - **No standalone .NET (Core) SDK** on PATH — `dotnet --list-sdks` empty. UE uses a
   bundled dotnet for UnrealBuildTool, so this is fine; don't assume `dotnet build`.
-- **No Unreal Engine MCP server in the Claude environment.** The live editor is
-  driven by its built-in Python console + GUI automation (see CONNECTED_TOOLS and
-  TESTED_WORKFLOWS). Earlier seed files assumed an Unreal MCP — that was wrong here.
+- **[CLAUDE-ENV] No Unreal Engine MCP loaded in this Claude session.** The live
+  editor is driven by its built-in Python console + GUI automation (see
+  CONNECTED_TOOLS / TESTED_WORKFLOWS). Earlier seed files assumed an Unreal MCP —
+  none was present for Claude here. This is session/agent-specific: Codex should
+  check its own loaded tools rather than assume the same.
 
 ## How the editor is actually controlled (verified)
 - Project Python remote execution is DISABLED. Drive the editor's bottom **Console

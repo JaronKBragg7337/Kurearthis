@@ -15,17 +15,16 @@ If you hit a hard limit, document it here so the next session does not repeat th
 - **What happened:** even with floating origin holding the body at the origin, the Chaos body was ejected (~985 cm/s position drift vs ~10 cm/s physics velocity, ~1 km/frame jumps) by glitchy contacts with the Earth-sized single static collision mesh.
 - **Rule:** the surface under the player must be LOCAL collision near origin (a terrain chunk that follows the floating origin), plus a custom radial-gravity controller. See Proof 2c.
 
-## No Unreal MCP in this environment (CORRECTED 2026-06-20)
-- **What happened:** seed files assumed an "Unreal Engine MCP" was active. There isn't one in the Claude env.
-- **Rule:** drive the editor via its Python console + GUI automation. Don't try to call a nonexistent MCP.
+## [CLAUDE-ENV] No Unreal MCP loaded for Claude (CORRECTED 2026-06-20)
+- **What happened:** seed files assumed an "Unreal Engine MCP" was active. None was loaded in the Claude session.
+- **Rule (Claude):** drive the editor via its Python console + GUI automation. **Codex:** session-specific — check your own loaded tools; don't infer yours from Claude's.
 
-## gh CLI installed but NOT authenticated (VERIFIED 2026-06-20)
-- **What happened:** `gh auth status` = not logged in; no GH_TOKEN. Push/pull still work via git + Credential Manager.
-- **Rule:** use plain `git` for repo ops. `gh pr/issue/api` will fail until `gh auth login`/GH_TOKEN.
+## ~~gh CLI not authenticated~~ → RESOLVED 2026-06-20 [MACHINE]
+- Was not logged in; **now authenticated** as JaronKBragg7337 (keyring). `gh api/pr/issue` work. Kept as history only.
 
-## Windows-MCP Click/Type `loc` is buggy (VERIFIED 2026-06-20)
-- **What happened:** passing `loc=[x,y]` fails pydantic validation (serialized to a string).
-- **Rule:** click/move with Win32 (`SetCursorPos`+`mouse_event`) instead. `Clipboard`, `Shortcut`, `Snapshot`, `App` work fine.
+## [CLAUDE-ENV] Windows-MCP Click/Type `loc` is buggy (VERIFIED 2026-06-20)
+- **What happened:** passing `loc=[x,y]` fails pydantic validation (serialized to a string) in Claude's Windows-MCP bridge.
+- **Rule (Claude):** click/move with Win32 (`SetCursorPos`+`mouse_event`). `Clipboard`, `Shortcut`, `Snapshot`, `App` work fine. Codex may not use this bridge.
 
 ## Editor must be closed to build a new/changed C++ module (VERIFIED 2026-06-20)
 - **What happened:** a new module can't hot-load; leaving an uncompilable module in `.uproject` bricks the editor ("Missing target file"/"Target Upgrade Required").

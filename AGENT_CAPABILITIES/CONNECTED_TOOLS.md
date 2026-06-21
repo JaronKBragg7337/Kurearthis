@@ -8,6 +8,9 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 ---
 
 ## Unreal editor control — Python console + GUI automation (NOT an MCP)
+- **Scope:** [CLAUDE-ENV] — this is how the *Claude* session drives the editor (no
+  Unreal MCP was loaded). Codex should use whatever editor tooling its own session
+  has; verify before assuming.
 - **Status:** Active, proven 2026-06-20
 - **What it can do:**
   - Enumerate live scene actors (verify state vs log) and read transforms
@@ -37,13 +40,14 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 - **Best pattern:** plain `git add/commit/push`. Attribution trailers per WORKFLOW. Rebase onto `origin/main` before pushing (other agents push too).
 
 ## GitHub CLI (gh)
-- **Status:** Installed (2.93.0) but **NOT authenticated** (`gh auth status` = not logged in; no GH_TOKEN)
-- **Implication:** `gh pr create`, `gh issue`, `gh api` will FAIL until `gh auth login` or a token is set. Repo push/pull does NOT need gh (git handles it). If you need gh, ask Jaron to authenticate or set GH_TOKEN.
+- **Status:** Installed (2.93.0) and **authenticated** as `JaronKBragg7337` (keyring, verified `gh api user` 2026-06-20). [MACHINE]
+- **What it can do:** create/manage PRs, issues, `gh api`, releases. Repo push/pull still goes through plain `git` (credential manager).
+- **Note:** auth is stored on the machine, so it applies to any agent on this PC (verify with `gh auth status`).
 
 ## winget (dependency installs)
 - **Status:** Active — used to install the .NET Framework 4.8.1 SDK this session
 - **Pattern:** `winget install --id <Id> --silent --accept-package-agreements --accept-source-agreements`. May trigger a UAC prompt — **Jaron approves it** (the AI can't click it). See `AUTHORIZATION.md`.
 
 ## Docker
-- **Status:** CLI installed (29.5.3); **daemon NOT running** (Docker Desktop not started)
-- **Implication:** no containers until Jaron starts Docker Desktop. Not currently part of any workflow.
+- **Status:** CLI 29.5.3; **daemon running** (Docker Desktop started 2026-06-20; `docker info` OK). [MACHINE]
+- **Note:** if `docker info` ever fails again, the Desktop app just needs to be (re)started: `Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"` and wait ~60–90 s. Not yet part of any game-dev workflow.

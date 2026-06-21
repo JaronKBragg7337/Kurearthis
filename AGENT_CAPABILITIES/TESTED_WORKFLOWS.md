@@ -36,7 +36,7 @@ Do not mark a workflow as proven unless Jaron or a verifiable output confirmed i
 
 ## Commit / push loop
 - **Status:** PROVEN — commits live at the repo
-- **Flow:** edit → `git add` → `git commit` (Co-Authored-By trailer) → `git fetch` + `git rebase origin/main` → `git push`. Plain git (gh not authed).
+- **Flow:** edit → `git add` → `git commit` (Co-Authored-By trailer) → `git fetch` + `git rebase origin/main` → `git push`. Push/pull use plain git; `gh` is authed too (PRs/issues/api available).
 - **Gotchas:** revert auto-generated `Config/DefaultEngine.ini` (AndroidFileServer block) before committing.
 
 ## Blender → Unreal FBX pipeline

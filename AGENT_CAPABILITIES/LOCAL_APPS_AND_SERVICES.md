@@ -19,19 +19,21 @@ including ones not yet integrated. Check here before assuming a capability is im
 ## Installed but not in active workflow
 | App | Potential use | Status (verified 2026-06-20) |
 |---|---|---|
-| Docker 29.5.3 | Containerized local services/build envs | Installed; **daemon NOT running** |
+| Docker 29.5.3 | Containerized local services/build envs | Installed; **daemon running** (started this session) |
 | VS Code | Editing, extensions, integrated tooling | Installed (`code` on PATH) |
 | Node.js v24 / npm 11 | JS tooling, MCP servers, scripts | Installed |
 | Python 3.12 / 3.14 | Scripting/automation outside Blender | Installed |
-| GitHub CLI `gh` 2.93.0 | PRs/issues/api | Installed but **NOT authenticated** |
+| GitHub CLI `gh` 2.93.0 | PRs/issues/api | **Authenticated** (JaronKBragg7337) |
 
-## MCP servers — what's REALLY available to Claude Code (2026-06-20)
+## MCP servers — loaded in THIS Claude session (2026-06-20) — [CLAUDE-ENV]
+> This table is agent/session-specific: it lists what the *Claude* session had
+> loaded. Codex has its own tool set — it must check its own, not assume this.
 | MCP | Status | Notes |
 |---|---|---|
 | Windows-MCP | Available, used | Desktop screenshot/snapshot, clipboard, shortcuts, PowerShell, app focus |
 | Desktop Commander | Available | Files, processes, search, long-running procs |
 | computer-use / Claude-in-Chrome / Claude_Preview | Available | Desktop & browser control if needed |
-| **Unreal Engine MCP** | **NOT present in Claude env** | Seed files assumed one exists — it does not here. Editor is driven via console + GUI. Re-check if one is added later. |
+| **Unreal Engine MCP** | **Not loaded for Claude** | Seed files assumed one exists — it was not loaded in this Claude session. Editor driven via console + GUI. Codex: check your own tools. |
 | **Blender MCP** | Not present | Use the headless CLI |
 | **Docker MCP** | Not relevant | Daemon isn't even running |
 | Cloud connectors (Supabase, Vercel, Cloudflare, Gmail, Calendar, etc.) | Available but off-topic | Not used for game dev |
