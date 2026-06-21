@@ -102,3 +102,40 @@ floating origin), and movement must use a **custom radial-gravity character cont
 (UE's `CharacterMovementComponent` assumes flat +Z up). Given 2a/2b/2c, the custom
 controller is the necessary path, not a shortcut: stock Chaos on a giant far mesh is
 demonstrably unusable. Floating origin (2c) is the proven spine the next layer builds on.
+
+### 2d — local surface patch built; Chaos force-integration quantitatively broken — 2026-06-21
+Built the first piece of that necessary architecture: a small **LocalSurfacePatch**
+(`/Engine/BasicShapes/Cube` scaled to a 5 km-wide, 200 m-thick slab) placed tangent to
+the sphere at the equator (+X), top face exactly at the surface radius, normal = radial
+up. `ProofEarth`'s collision was downgraded to **QueryOnly** so the giant mesh stops
+providing the glitchy physics contacts of 2c (it stays visual + line-traceable). The
+existing `ARadialGravityTestBody` was released ~1 km above the patch with the floating
+origin active. Setup: `_authoring/setup_surface_patch_proof.py`; run head-less through
+`_authoring/run_physics_harness.py 33 --setup ...`.
+
+- **At planetary scale the body still does not fall.** `Saved/RadialGravityProof.json`:
+  after 30 s it sits at dist `637,202,870 cm` (~1 km *above* the surface, i.e. its
+  release altitude), having drifted *outward* ~97 cm/s while reported physics velocity
+  read ~0–10 cm/s. With `ProofEarth` query-only and the patch 1 km away, this is **not**
+  contact ejection — the body simply will not accelerate toward the 6,371 km-distant
+  center. `up` stayed radial `(1,0,0)`.
+- **A near-origin control isolates the cause** (`_authoring/setup_nearorigin_control.py`:
+  same body + patch, gravity center at the origin, 200 m "surface", released 300 m up,
+  no floating origin). Here the body *does* fall straight down (`up=(1,0,0)`, zero Y/Z
+  drift) — but **~100× too slowly**: over 34 s it fell only 5,765 cm (position-derived
+  a ≈ **9.8 cm/s²**, 1/100 of the commanded 980), while reported velocity climbed to
+  3,307 cm/s (velocity-derived a ≈ **96 cm/s²**, 1/10 of commanded). So two stacked ~10×
+  deficits: commanded accel → reported velocity (÷10), and reported velocity → actual
+  displacement (÷10). The `Mesh->AddForce(dir * g, bAccelChange=true)` path does not
+  integrate correctly for this body even at the origin.
+
+**Conclusion:** the local-collision-near-origin architecture is sound to build, but
+driving the fall with **Chaos `AddForce` is unreliable** — broken at planetary scale and
+quantitatively wrong (~100× slow) even at the origin. This matches 2a, where the
+double-precision *integrator* fell in 14 s and rested exactly. The next layer must drive
+motion by **direct integration in a custom radial-gravity controller** (set velocity /
+sweep position against the local patch collision), not by Chaos forces. The patch, the
+QueryOnly planet, and the floating origin are the verified pieces; the integrator is the
+missing one. Open sub-question to resolve when the build resumes: whether the ~10×/10×
+`AddForce` deficits are a project physics-substep/units setting or an inherent
+`bAccelChange` behavior — but the controller does not depend on the answer.

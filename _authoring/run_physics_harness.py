@@ -9,10 +9,12 @@ Drives the live editor over remote execution (ue_remote.py):
 
 Usage (system Python, editor must be open with remote exec enabled):
   python _authoring/run_physics_harness.py [seconds]
+  python _authoring/run_physics_harness.py 33 --setup _authoring/setup_surface_patch_proof.py
 
 This replaces hand-driving the Simulate/Stop buttons.
 """
 
+import argparse
 import json
 import subprocess
 import sys
@@ -21,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 UE_REMOTE = ROOT / "_authoring" / "ue_remote.py"
-SETUP = ROOT / "_authoring" / "spawn_chaos_gravity_body.py"
+DEFAULT_SETUP = ROOT / "_authoring" / "spawn_chaos_gravity_body.py"
 RESULT = ROOT / "Saved" / "RadialGravityProof.json"
 
 START = "import unreal; unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_play_simulate()"
@@ -45,7 +47,16 @@ def step(label, cp):
 
 
 def main():
-    sim_seconds = float(sys.argv[1]) if len(sys.argv) > 1 else 25.0
+    ap = argparse.ArgumentParser()
+    ap.add_argument("seconds", nargs="?", type=float, default=25.0,
+                    help="wall-clock seconds to let the simulation run")
+    ap.add_argument("--setup", default=str(DEFAULT_SETUP),
+                    help="path to the editor-Python setup script to run before Simulate")
+    args = ap.parse_args()
+    sim_seconds = args.seconds
+    setup_path = Path(args.setup).resolve()
+    if not setup_path.exists():
+        raise SystemExit(f"setup script not found: {setup_path}")
 
     # Make sure the editor socket is reachable before we touch state.
     probe = remote("--stmt", "print('PING')")
@@ -55,7 +66,8 @@ def main():
     if RESULT.exists():
         RESULT.unlink()
 
-    step("setup", remote("--file", str(SETUP)))
+    print(f"[setup] {setup_path.name}")
+    step("setup", remote("--file", str(setup_path)))
     step("start-simulate", remote("--stmt", START))
 
     print(f"[run] simulating ~{sim_seconds:.0f}s ...")
