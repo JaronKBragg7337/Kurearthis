@@ -51,6 +51,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SurfacePatch")
 	double SurfaceRadius = 637100000.0;
 
+	/**
+	 * If true, the patch is a FIXED tile: it never auto-finds a Focus and never moves
+	 * (Tick early-returns). Used by ASurfaceTileManager, which places a deterministic
+	 * grid of fixed tiles in world space so the ground under the player stays put (good
+	 * feel) while tiles stream in ahead / out behind. Set BEFORE BeginPlay (deferred
+	 * spawn) so the auto-focus-find is skipped.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SurfacePatch")
+	bool bFixed = false;
+
 private:
 	FVector GravityCenter() const;
 };

@@ -243,3 +243,36 @@ roam without reaching the patch edge. This is the first step of the terrain stre
 
 **Status:** roaming LOGIC proven head-less. Pending: Jaron walks far in Play and confirms
 he never falls off / the ground stays under him (human-judgment).
+
+### 2i — seamless roaming: a STREAMED grid of FIXED tiles (PASS, head-less) — 2026-06-21
+The single follower tile (2h) keeps the pawn grounded but glues the ground to the player
+in Play — no sense of motion (Jaron hit this). The real fix is `ASurfaceTileManager`
+(`Source/Kurearthis/`): it keeps a small grid (3×3) of tiles **fixed in world space**
+centered on the pawn's cell, and as the pawn crosses a tile boundary it spawns tiles
+ahead and destroys tiles behind. Each tile stays put (good feel) while the ground never
+runs out (infinite roaming). Tiles sit on a deterministic spherical lattice — each cell
+(i,j) → a fixed longitude/latitude band → a fixed world transform — so a tile never
+moves once placed (only spawns/despawns). Fixed tiles reuse `ASurfacePatch` with a new
+`bFixed` flag (deferred-spawned so it never auto-grabs the Focus tag). Ticks in
+TG_PrePhysics so the grid is in place before the pawn grounds. Setup:
+`_authoring/setup_tile_grid_proof.py`.
+
+- **Pawn (`Saved/RadialGravityProof.json`):** driven +Y at 500 m/s for ~40 s traveled
+  **20,267 m** (≈ 4 tiles of 5 km) and stayed grounded the entire way —
+  `grounded=true`, `vertical_vel=0`, `capsule_up_dot_radial=1.0`, `local_up=(0.999995,
+  0.003181, 0)` where 0.003181 rad = arc/radius (exact curvature tracking).
+  `height_above_surface ≈ 49 cm` is the expected flat-tile bulge (a flat tile tangent at
+  its center stands s²/2R ≈ 49 cm proud at a 2.5 km offset; smaller tiles hug the sphere
+  better than the old 15 km single patch, whose max bulge was ~4 m).
+- **Grounding across boundaries (`Saved/RadialGravityProof.log`):** 152 ticks logged,
+  only **1 ungrounded** — the initial 2 m spawn drop (t=0.33 s). All **4 tile-boundary
+  crossings** stayed grounded — no seam, no fall-through.
+- **Streaming (`Saved/TileGrid.json`):** `active_tiles=9` (steady 3×3), `total_spawned=21`,
+  `total_destroyed=12`, `current_cell=[4,0]` — the pawn advanced 4 cells in longitude and
+  the grid streamed tiles in ahead / out behind, holding 9 active the whole time.
+- The playable scene (`setup_pawn_play.py`) now uses the streamed grid (replacing the
+  single fixed patch), so Play roaming is ready for Jaron's feel test.
+
+**Status:** seamless-roaming LOGIC + streaming proven head-less. Pending: Jaron walks far
+in Play and confirms the ground feels solid/seamless with no pop or snap as tiles stream
+(human-judgment — the one thing the harness can't measure).

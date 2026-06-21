@@ -46,7 +46,9 @@ void ASurfacePatch::BeginPlay()
 			PlanetActor = Found[0];
 		}
 	}
-	if (!Focus)
+	// A fixed tile (managed by ASurfaceTileManager) must NOT grab the focus, or it would
+	// start following the pawn and the ground would glue to the player again.
+	if (!bFixed && !Focus)
 	{
 		TArray<AActor*> Found;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Focus"), Found);
@@ -61,7 +63,7 @@ void ASurfacePatch::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (!Focus)
+	if (bFixed || !Focus)
 	{
 		return;
 	}
