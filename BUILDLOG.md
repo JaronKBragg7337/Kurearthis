@@ -6,24 +6,32 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 
 ## Current state
 - **Project:** Kurearthis
-- **Unreal status:** Planetary proof 1 complete and `ProofEarth` now has verified usable surface collision; `PlanetaryProof` holds one rounded-Earth-mean-radius body at world origin; `Foundation` remains the control map
+- **Unreal status:** Planetary proofs 1–2 complete: `ProofEarth` has verified surface collision AND radial gravity + local-up are proven; `PlanetaryProof` holds `ProofEarth` plus a `GravityRestMarker` resting on the equator; `Foundation` remains the control map
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
-- **Git status:** Clean — surface collision proof committed
-- **Last verified good state:** Live editor audit of `PlanetaryProof` = exactly 1 actor `ProofEarth` at origin, scale 6371; a simple radial north-pole line trace blocks on it with impact normal `(0,0,1)` at radius `~637,100,672 cm`
+- **Git status:** Clean — radial gravity proof committed
+- **Last verified good state:** Body released 1 km above the equator (+X) fell purely along −X to the real surface (rest dist `637,099,968 cm`, ≈ nominal radius), with `local_up=(1,0,0)` and exactly zero Y/Z drift. Logged in `Saved/RadialGravityProof.json` + `.log`. Live Outliner = 2 actors (`ProofEarth`, `GravityRestMarker`)
 - **Current builder:** Claude
-- **Active blockers:** None
+- **Active blockers:** None (C++ runtime gravity component is written but its compile is gated on a `.NET Framework 4.8 SDK` install — needs admin)
 
 ## Known issues
-- Local reference frame, radial gravity, and player behavior are not yet proven; `ProofEarth` is now a collidable static mesh but nothing stands on it yet.
-- Collision/trace impact results are float32: at ~6.37e8 cm the ULP is tens of cm, so trace hit points carry sub-meter-to-few-meter scatter (impact `637,100,672` vs proof-1 bounds `637,100,105`). Acceptable for representation/collision; keep in mind for gravity and movement math.
+- The radial-gravity proof is a deterministic Newtonian integration colliding against the REAL `ProofEarth` mesh — it proves the architecture (radial g + radial up + rests on real surface) but is NOT yet the engine's Chaos physics. The real Chaos runtime body (`ARadialGravityTestBody`, in `_authoring/unreal_cpp/`) is written and ready but cannot compile until the `.NET Framework 4.8 SDK` is installed (the editor build pulls in `SwarmInterface`, which requires it; install needs admin/UAC).
+- No player-controlled pawn yet; local up is proven as a vector, not yet driven into a movement component.
+- Physics/trace math at ~6.37e8 cm is float32 (tens-of-cm ULP): equator rest landed −32 cm vs nominal, north-pole surface +672 cm vs nominal — expected scatter, do gravity/movement math in doubles.
 - `Foundation` is intentionally flat and must remain a control map, not become the game-world architecture.
 
 ## Next up
-1. Add a minimal radial-gravity test pawn as a separate chunk: spawn a physics body above the north pole and prove it falls toward planet center and rests on the surface.
-2. Then prove a correct local up direction for a controlled pawn (surface stand + orientation), still in `PlanetaryProof`.
-3. Defer atmosphere/space transition (proof 3) and the second body (proof 4) until gravity + local up are proven.
+1. Install the `.NET Framework 4.8 SDK` (admin), drop `_authoring/unreal_cpp/` back into `Source/`, compile, and re-run the fall with real Chaos physics to confirm the integrator result matches the engine.
+2. Then prove a controlled pawn standing on the surface with correct local up (orient capsule to radial up), still in `PlanetaryProof`.
+3. Defer atmosphere/space transition (proof 3) and the second body (proof 4) until a pawn stands and orients.
 
 ## Recent entries
+
+### 2026-06-20 — Builder: Claude
+- Did: Proved radial gravity + local up on `ProofEarth`. Released a test body 1 km above the EQUATOR (+X) and integrated constant acceleration (980 cm/s²) toward the planet center, colliding against the real `ProofEarth` collision mesh via engine line traces. Left a visible `GravityRestMarker` resting on the surface and saved the level. Also wrote a forward-compatible C++ Chaos body (`ARadialGravityTestBody`) intended as the runtime path
+- Verified: `Saved/RadialGravityProof.json` — `rested=true`, fell from x=637,200,000 to rest at (637,099,968, 0, 0) = dist `637,099,968 cm` (≈ nominal radius, −32 cm float32), `local_up_at_rest=(1,0,0)`, `max_abs_y=0`, `max_abs_z=0` (zero lateral drift → motion was radial −X, NOT flat −Z). Trajectory log shows X decreasing while Y,Z stay 0.0 and speed rising at exactly g. Live Outliner shows 2 actors
+- Files changed: `Content/PlanetaryProof.umap`, `_authoring/prove_radial_gravity.py`, `_authoring/unreal_cpp/**` (C++ module), `ASSETS_MANIFEST.md`, `BUILDLOG.md`
+- Notes: Equator placement is deliberate — at the equator flat −Z gravity would drift the body in Z and never land radially; only true radial gravity produces the observed pure −X fall. The Chaos/C++ route was attempted first but blocked: no `.NET Framework 4.8 SDK` (SwarmInterface won't instantiate) and no admin to install it; an uncompilable module bricks the editor, so the C++ was moved out of `Source/` into `_authoring/unreal_cpp/` and the project kept Blueprint-only. The editor was closed/reopened during build attempts and re-verified clean on reopen (Restart/Crash law)
+- Next: Install `.NET Framework 4.8 SDK`, compile the C++ body, and confirm engine Chaos physics reproduces this fall; then a surface-standing pawn with radial up
 
 ### 2026-06-20 — Builder: Claude
 - Did: Connected to the live Unreal editor, audited the in-memory `PlanetaryProof` scene (matched the log: 1 actor `ProofEarth` at origin, scale 6371 — no divergence), then gave `ProofEarth` usable surface collision by setting the planet mesh body setup to Use Complex Collision As Simple and confirming the actor component blocks queries (`BlockAll`, `QueryAndPhysics`)
