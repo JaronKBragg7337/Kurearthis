@@ -15,6 +15,13 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 - Gotchas found: render target must be `RTF_RGBA8` (a float format exports OpenEXR under a .png name); proof maps are unlit so the script adds + removes temporary lights for the shot.
 - Source: live runs 2026-06-21.
 
+## 2026-06-21 — Capability #6: physics-settings introspection (Claude)
+- Changed by: Claude
+- Now POSSIBLE: dump the project's Chaos/physics settings head-less — `python _authoring/ue_remote.py --file _authoring/dump_physics_settings.py` (writes `Saved/PhysicsSettings.json`). Surfaced `max_physics_delta_time=1/30`, `max_substep_delta_time=1/60`, `max_substeps=6`, `default_terminal_velocity=4000`, `default_gravity_z=-980` for reasoning about the Proof 2d physics.
+- Finding: these rule out terminal-velocity capping and a low-fps slow-motion artifact for the 2d ~100× `AddForce` deficit (Simulate ran real-time), so that anomaly stays open with data attached. The custom integrator sidesteps it.
+- Limit found: `EditorPerformanceSettings` and the `b_substepping*` bools are not exposed to Python in 5.8 — read those from config ini, not the CDO.
+- Source: live run 2026-06-21.
+
 ## 2026-06-21 — Asset-production toolkit installed (Claude)
 - Changed by: Claude (Jaron requested; approved UAC where prompted)
 - Now POSSIBLE — the agent can produce real assets from scripts, not just placeholders:

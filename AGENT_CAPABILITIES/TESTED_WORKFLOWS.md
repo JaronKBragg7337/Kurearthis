@@ -41,6 +41,12 @@ Do not mark a workflow as proven unless Jaron or a verifiable output confirmed i
 - **Verified by:** captured `PlanetaryProof` — the Earth-scale `ProofEarth` sphere renders correctly against black space (`Saved/Screenshots/view_*.png`).
 - **Gotchas:** (1) On-screen `HighResShot` does NOT render when the editor window is minimized/occluded — use this off-screen path instead. (2) Use `TextureRenderTargetFormat.RTF_RGBA8`, else `export_render_target` writes OpenEXR bytes under a `.png` name. (3) The proof maps have no lights, so the script spawns a temporary DirectionalLight + SkyLight just for the shot and removes them (the saved scene is untouched). (4) Output lands in `Saved/Screenshots/` (gitignored).
 
+## Physics-settings introspection
+- **Status:** PROVEN 2026-06-21
+- **Flow:** `python _authoring/ue_remote.py --file _authoring/dump_physics_settings.py` → prints key Chaos/physics settings and writes `Saved/PhysicsSettings.json`.
+- **Verified by:** dumped UPhysicsSettings — `max_physics_delta_time=1/30`, `max_substep_delta_time=1/60`, `max_substeps=6`, `default_terminal_velocity=4000`, `default_gravity_z=-980`.
+- **Gotchas:** the substepping bool property names (`b_substepping*`) are NOT exposed on the Python CDO in 5.8 (caught + reported as n/a); the numeric substep props ARE readable. `EditorPerformanceSettings` is not exposed to Python (the background-CPU-throttle flag must be read from `Config/*EditorPerProjectUserSettings.ini`, not Python).
+
 ## Install a dependency via winget
 - **Status:** PROVEN 2026-06-20 (.NET Framework 4.8.1 SDK)
 - **Flow:** `winget install --id <Id> --silent --accept-package-agreements --accept-source-agreements` → tell Jaron a UAC prompt may appear → Jaron approves → verify registry/files.
