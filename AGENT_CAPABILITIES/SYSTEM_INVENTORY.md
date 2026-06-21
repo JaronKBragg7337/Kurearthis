@@ -41,6 +41,7 @@ Do not trust this file blindly — verify live before relying on entries older t
 | Diagrams/docs | Graphviz 15.1.0 (`C:\Program Files\Graphviz\bin\dot.exe`), Pandoc 3.10 | 2026-06-21 OK |
 | Audio | SoX 14.4.2 (`sox`), ffmpeg | 2026-06-21 OK |
 | .NET + C++ tooling | .NET SDK 8.0.422 (`dotnet`), CMake 4.3.3, Ninja 1.13.2 | 2026-06-21 OK |
+| Data/telemetry (Python) | pandas 3.0.3, numpy 2.4.6, matplotlib 3.11.0 (system python 3.12) | 2026-06-21 OK |
 | Note | Inkscape & Graphviz aren't on PATH — use full paths above, or refresh PATH from registry in-session | 2026-06-21 |
 
 ## NOT present / corrected assumptions

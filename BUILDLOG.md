@@ -10,8 +10,9 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
 - **Git status:** Clean — floating-origin foundation + findings + AUTHORIZATION.md committed
 - **Last verified good state:** After stopping Simulate, live audit = 4 actors, no ghosts. `Saved/FloatingOrigin_run.log` shows the world rebasing to keep the body at the origin (rebase #1: body 637,200,000 → 0)
+- **Tooling (built 2026-06-21):** Unreal **Python remote execution** is ON — drive the editor headless via `python _authoring/ue_remote.py --file/--stmt`. Scripted physics harness `python _authoring/run_physics_harness.py [s]` (no GUI Simulate). CI runs on every push. Asset toolkit installed (ImageMagick, Inkscape, Graphviz, Pandoc, SoX, ffmpeg) + data (pandas/numpy/matplotlib) + .NET8/CMake/Ninja. gh authed, Docker up. See `AGENT_CAPABILITIES/`.
 - **Current builder:** Claude
-- **Active blockers:** None
+- **Active blockers:** None — BUILD is intentionally PAUSED by Jaron while expanding capabilities. Resume at "Next up #1" when he says go.
 
 ## Known issues
 - **ARCHITECTURE FINDINGS (Proof 2, see `PLANETARY_PROOF.md`):**
@@ -27,6 +28,12 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 3. Defer atmosphere/space (proof 3) and the second body (proof 4) until a pawn stands and moves.
 
 ## Recent entries
+
+### 2026-06-21 — Builder: Claude (capability session, not game build)
+- Did: Hardened the toolchain so future build sessions are fast and reliable. (1) Enabled Unreal Python remote execution → `_authoring/ue_remote.py` runs editor Python over a socket, no GUI. (2) Built `_authoring/run_physics_harness.py` — scripted Simulate-In-Editor test (start/stop via `editor_play_simulate`/`editor_request_end_play`), reads result. (3) Added CI (`.github/workflows/ci.yml`), green. (4) Investigated Unreal/Blender MCPs → documented, not adopted (remote exec covers it). Fixed gh auth (+workflow scope) and Docker daemon. Installed asset toolkit (ImageMagick, Inkscape, Graphviz, Pandoc, SoX, ffmpeg, uv, jq, ripgrep, 7-Zip), data (pandas/numpy/matplotlib), .NET8/CMake/Ninja. Wrote `AGENT_CAPABILITIES/` docs: MCP_OPTIONS, USAGE_AND_LIMITS, AUTOMATION_AND_AGENTS, SESSION_WARMUP, plus verified SYSTEM_INVENTORY/CONNECTED_TOOLS/etc.
+- Verified: ran `live_scene_audit.py` and the physics harness over remote exec (no GUI); CI run = success; all tool versions checked; rendered `_authoring/diagrams/status.png` via Graphviz
+- Files changed: `Config/DefaultEngine.ini` (bRemoteExecution), `_authoring/ue_remote.py`, `_authoring/run_physics_harness.py`, `.github/workflows/ci.yml`, `AGENT_CAPABILITIES/**`, `AUTHORIZATION.md` was prior
+- Next: No game-build change this entry. When Jaron says go, resume "Next up #1" (local surface-collision patch near origin) — now runnable via the harness
 
 ### 2026-06-20 — Builder: Claude
 - Did: Built the floating-origin foundation `AFloatingOriginManager` (`Source/Kurearthis/`): keeps a Focus actor within 500 m of world origin via `UWorld::SetNewWorldOrigin` each tick, so the active region (and thus Chaos) stays in a precise frame. Made `ARadialGravityTestBody` read the planet center dynamically (planet tagged "Planet") so the math survives rebasing. Compiled, reopened the editor, spawned body + manager, ran under Simulate. Also added `AUTHORIZATION.md` (standing build/install permissions) and a No-shortcut law, per Jaron's direction
