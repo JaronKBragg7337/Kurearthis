@@ -273,6 +273,8 @@ TG_PrePhysics so the grid is in place before the pawn grounds. Setup:
 - The playable scene (`setup_pawn_play.py`) now uses the streamed grid (replacing the
   single fixed patch), so Play roaming is ready for Jaron's feel test.
 
-**Status:** seamless-roaming LOGIC + streaming proven head-less. Pending: Jaron walks far
-in Play and confirms the ground feels solid/seamless with no pop or snap as tiles stream
-(human-judgment — the one thing the harness can't measure).
+**Status:** seamless-roaming LOGIC + streaming proven head-less AND **Jaron-confirmed in
+Play (2026-06-21)** — he walked continuously with no fall-off and no pop/snap ("kept going
+and going"). The lack of a sense of progress is the planet being Earth-scale honest
+(~20,015 km to the antipode, ~19 days' walk at 12 m/s) — reference cues come with Proof 3
+(sky/horizon) and later real landmarks. **CHARTER proof #2 (incl. real roaming) is DONE.**
