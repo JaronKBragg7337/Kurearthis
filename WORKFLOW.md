@@ -23,6 +23,18 @@ Then stop new feature work and resolve the mismatch first.
 
 This step exists because a crashed session can leave ghost actors in Unreal with no log entry. Those ghosts cause bugs that no future session can diagnose from the log alone.
 
+## Capability check rule (read when blocked, uncertain, or failing)
+Do NOT assume a tool is unavailable just because it is not immediately obvious.
+
+When blocked, uncertain, or repeating a failing workflow:
+1. Inspect the local environment first — check what is already installed, connected, authenticated, or reachable on this machine before assuming anything.
+2. Consult `AGENT_CAPABILITIES/` for known tools, working patterns, and documented limits.
+3. If still blocked, search for newly available tools, MCPs, connectors, prompts, or workflows that could help.
+
+Prefer verified local capability over memory or assumption.
+If a new capability is discovered, record it in `AGENT_CAPABILITIES/`.
+If a new limitation is discovered, record that too.
+
 ## Active architecture proof order
 Until the planetary foundation milestone in `CHARTER.md` is complete, work in this order:
 1. Create one spherical body at a deliberate, documented scale.
