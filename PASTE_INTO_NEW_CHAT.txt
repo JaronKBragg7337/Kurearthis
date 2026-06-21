@@ -11,6 +11,11 @@ READ IN THIS ORDER before doing anything:
 4. AGENT_CAPABILITIES/   (read SYSTEM_INVENTORY.md, CONNECTED_TOOLS.md, SESSION_WARMUP.md, USAGE_AND_LIMITS.md, AUTOMATION_AND_AGENTS.md, and TESTED_WORKFLOWS.md + CHANGELOG_CAPABILITIES.md — what's installed, the PROVEN tool commands, and what's been tried)
 5. BUILDLOG.md           (current state, known issues, exact Next up)
 
+BACKGROUND (context, NOT a build directive): WORLD_MODEL.md is the forward-looking
+world architecture (embodiment/physics vs continuous server-side world-simulation;
+multiplayer; simulation LOD). It is the destination map only — the CHARTER proof
+order still governs what to build next. Do NOT start world-systems work from it.
+
 KEY THINGS THAT ARE ALREADY TRUE (verified 2026-06-21):
 - Drive the LIVE editor headless via remote execution — NO clipboard/GUI clicking:
     python _authoring/ue_remote.py --file _authoring/<script>.py
