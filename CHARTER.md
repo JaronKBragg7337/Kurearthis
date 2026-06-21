@@ -5,8 +5,12 @@ Read this before doing anything. These rules persist between sessions and may on
 ## Core law
 Build the smallest real playable foundation first. Earn complexity through working layers.
 
-## Project identity law
-Kurearthis is not a continuation of prior SYL game ambitions. Its mature direction is a real-world/real-solar-system grounded experience: Earth-first planetary reality, then atmosphere, space, Moon/other bodies, and real locations. Do not import legacy game-specific entities, platforms, ships, bases, factions, economy assumptions, or separate staged elevations unless Jaron explicitly reintroduces them.
+## Assumption law
+Do not import unverified gameplay assumptions.
+
+Assume only what exists in this repository and the verified live scene.
+
+The current objective is proving a real planetary world model. Additional gameplay, narrative, economic, social, ownership, vehicle, settlement, or progression systems must be explicitly introduced rather than inferred.
 
 ## Planetary truth law
 The game's foundational truth is planetary: a player can stand on a spherical body, use that body's local gravity and up direction, leave its atmosphere for dark space, and coexist with another body in the same world model. Prove this architecture before building gameplay systems that assume a flat world.
