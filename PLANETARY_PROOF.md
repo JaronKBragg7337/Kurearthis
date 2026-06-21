@@ -209,8 +209,16 @@ rebases to origin via the floating origin, so it renders clean).
 
 - Verified head-less: movement logic unchanged after the rewrite (grounded, traveled,
   `capsule_up_dot_radial=1.0` via the DebugDrive path).
-- **Needs Jaron (human-judgment, per WORKFLOW):** open `Content/PlanetaryProof`, press
-  Play — WASD to move, mouse to look — and judge feel + whether "up" reads correctly.
-- Risk to confirm in that test: legacy `BindAxis` firing under the project's default
-  `EnhancedInputComponent`. If WASD/mouse don't respond, the follow-up is a proper
-  Enhanced Input setup (Input Actions + Mapping Context).
+- **CONFIRMED by Jaron (human-judgment, per WORKFLOW), 2026-06-21:** Play works — WASD
+  moves, mouse looks, the pawn stands upright on the surface and walks on the planet.
+  Legacy `BindAxis` fires fine under the default `EnhancedInputComponent` (no Enhanced
+  Input rewrite needed). One fix during the test: the spring arm was ignoring the
+  pawn's pitch/roll so the camera looked sideways (up at the equator is world +X, not
+  +Z) — fixed to inherit the pawn's full orientation.
+
+**CHARTER proof #2 (a player stands and moves with radial gravity + correct local up)
+is COMPLETE.** Foundation proven end to end: Earth-scale body (1) → radial gravity model
+(2a) → the Chaos-vs-scale findings (2b/2c/2d) → floating origin + local patch + swept
+integrator (2e) → custom pawn movement (2f) → playable, human-confirmed (2g). Next
+milestones: let the surface follow the player so they can roam the whole sphere, then
+proof 3 (surface → atmosphere → space) and proof 4 (a second body).
