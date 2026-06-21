@@ -169,3 +169,31 @@ origin (2c) + local surface patch (2d) + a custom double-precision swept integra
 (2e) make a body fall under radial gravity and rest on the surface with radial up,
 near the world origin where everything is precise. This is the foundation a
 player-controlled pawn (next) builds on.
+
+### 2f — pawn stands and moves tangentially with radial up (movement logic, PASS) — 2026-06-21
+Built `ARadialGravityPawn` (`Source/Kurearthis/`), a custom-movement `APawn` (NOT
+`CharacterMovementComponent`, which assumes flat +Z up). Each tick it computes radial
+up, moves tangentially (input projected onto the local tangent plane), applies radial
+gravity with a downward swept move that grounds the capsule on `LocalSurfacePatch`,
+and re-orients the capsule so its up tracks the radial direction. Reads the planet
+center by the "Planet" tag, so it works under floating-origin rebasing. Verified
+head-less by driving it +Y for ~15 s (`_authoring/setup_pawn_walk_proof.py`).
+
+- **Result (`Saved/RadialGravityProof.json`):** `grounded=true`,
+  `height_above_surface_cm ≈ 1.6` (capsule resting on the patch),
+  `tangential_traveled_cm = 153,335` (= MoveSpeed 10,000 cm/s × 15.3 s — full speed,
+  not throttled), `vertical_vel = 0`, `capsule_up_dot_radial = 1.0`. Crucially,
+  `local_up` tilted to `(1, 0.000241, 0)` — and 0.000241 rad = arc length / radius
+  (153,335 / 637,100,000), so the radial up tracked the sphere's curvature EXACTLY as
+  the pawn walked. The trajectory log shows the floating origin rebasing under the
+  moving pawn (Y snaps back near origin while travel keeps accumulating), keeping the
+  active region precise.
+- **Movement gotcha (recorded):** a grounded capsule grazes the flat floor on a
+  horizontal *sweep* and stops dead. The tangential move is therefore non-swept on the
+  flat, obstacle-free patch; the real collision work (radial-gravity grounding) stays
+  swept. Horizontal obstacle collision / surface sliding is a follow-up for when the
+  terrain has relief.
+
+**Status:** CHARTER proof #2 movement LOGIC is proven head-less. Remaining for proof
+#2 to be fully "playable": possession + a camera + input mappings + Jaron's feel test
+(human-judgment — see WORKFLOW). The math/architecture is done; the feel pass is next.
