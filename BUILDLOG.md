@@ -6,25 +6,34 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 
 ## Current state
 - **Project:** Kurearthis
-- **Unreal status:** Planetary proofs 1–2 complete. `ProofEarth` has verified surface collision; radial gravity + local-up proven by a double-precision integrator. **NOW A C++ PROJECT** (`Source/Kurearthis`, module `Kurearthis` compiles on UE 5.8). `PlanetaryProof` holds `ProofEarth`, `GravityRestMarker`, and `ChaosGravityBody`; `Foundation` remains the control map
+- **Unreal status:** C++ project on UE 5.8 (`Source/Kurearthis`). Floating-origin foundation (`AFloatingOriginManager`) built and proven to rebase correctly. Proofs: 1 (scale) ✓, 2a radial-gravity MODEL ✓ (double-precision integrator), 2b/2c established that stock Chaos cannot run on an Earth-sized single static mesh. `PlanetaryProof` holds `ProofEarth`, `GravityRestMarker`, `ChaosGravityBody`, `FloatingOriginManager`; `Foundation` is the control map
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
-- **Git status:** Clean — radial gravity proof + Chaos-at-scale finding committed
-- **Last verified good state:** Live Outliner = 3 actors (`ProofEarth` @origin, `GravityRestMarker` @equator, `ChaosGravityBody` @`637,200,000,0,0`), verified after stopping Simulate — no ghosts. Integrator result in `Saved/RadialGravityProof_integrator.json`; Chaos run in `Saved/RadialGravityProof.json/.log`
+- **Git status:** Clean — floating-origin foundation + findings + AUTHORIZATION.md committed
+- **Last verified good state:** After stopping Simulate, live audit = 4 actors, no ghosts. `Saved/FloatingOrigin_run.log` shows the world rebasing to keep the body at the origin (rebase #1: body 637,200,000 → 0)
 - **Current builder:** Claude
 - **Active blockers:** None
 
 ## Known issues
-- **CRITICAL ARCHITECTURE FINDING (Proof 2b):** stock Chaos rigid-body physics does NOT work at true planetary absolute coordinates (~6.37e8 cm from world origin). A real Chaos body under radial gravity fell ~5× too slowly (12 cm/s at t=12s vs expected ~12,000), drifted ~37 km outward first, took ~70s to land, then slid tangentially (~3,750 cm/s) without resting, penetrating ~100 m. Radial direction + collision are correct; the solver DYNAMICS break down (large-world-coordinate float precision). The double-precision integrator (Proof 2a) was correct. See `PLANETARY_PROOF.md` Proof 2.
-- Implication: the game must keep simulated bodies near world origin (origin rebasing / floating frame) OR drive surface movement with a custom double-precision integrator — not raw Chaos forces at planetary coords. This decision gates the player/movement work.
-- No player-controlled pawn yet; local up is proven as a vector, not yet driven into a movement component.
-- Math at ~6.37e8 cm is float32 (tens-of-cm ULP): integrator equator rest −32 cm vs nominal, north-pole surface +672 cm vs nominal — expected scatter, do movement math in doubles.
-- `Foundation` is intentionally flat and must remain a control map.
+- **ARCHITECTURE FINDINGS (Proof 2, see `PLANETARY_PROOF.md`):**
+  - 2a: a double-precision integrator correctly proves the gravity MODEL — body released above the equator falls radially (−X, zero Y/Z drift) and rests on the real surface with `up=(1,0,0)`.
+  - 2b: stock Chaos at ~6.37e8 cm from origin fails (5× too slow, drifts outward, slides without resting) — large-world float precision.
+  - 2c: floating origin (`AFloatingOriginManager`) WORKS (rebasing confirmed, body held at origin), but the Chaos body STILL won't fall — its world position is ejected ~985 cm/s while physics velocity reads ~10, i.e. the body is shoved out by glitchy contacts with the **Earth-sized single static collision mesh**. Floating origin fixes the body's coordinates but the planet is still one huge far-centered mesh.
+- **Necessary architecture (evidence-backed, NOT a shortcut):** the planet cannot be one giant static collision mesh. The surface under the player must be LOCAL collision near the origin (a terrain chunk that follows the floating origin), and movement needs a custom radial-gravity character controller (UE's CharacterMovementComponent assumes flat +Z up). Stock Chaos on a giant far mesh is demonstrably unusable, so the custom controller is required, not optional.
+- No player-controlled pawn yet. `Foundation` stays a flat control map.
 
 ## Next up
-1. Decide the movement-frame strategy given Proof 2b: (a) origin-rebasing so the player's region sits near world origin and Chaos is stable, or (b) a custom kinematic radial-gravity character controller in double precision. Recommend prototyping (b) first (smaller), as a controlled pawn standing on the surface with capsule oriented to radial up — still in `PlanetaryProof`.
-2. Defer atmosphere/space transition (proof 3) and the second body (proof 4) until a pawn stands and orients on the surface.
+1. Build the next necessary layer: a LOCAL surface-collision representation near the world origin (a ground patch/chunk oriented to radial up, following `AFloatingOriginManager`), so a Chaos body actually rests on real collision near origin. Verify a body released above it falls under radial gravity and rests with `up` radial. This is the miniature of the real planet-chunk + floating-origin system.
+2. Then a custom radial-gravity character controller (capsule oriented to radial up) standing and moving on that local surface.
+3. Defer atmosphere/space (proof 3) and the second body (proof 4) until a pawn stands and moves.
 
 ## Recent entries
+
+### 2026-06-20 — Builder: Claude
+- Did: Built the floating-origin foundation `AFloatingOriginManager` (`Source/Kurearthis/`): keeps a Focus actor within 500 m of world origin via `UWorld::SetNewWorldOrigin` each tick, so the active region (and thus Chaos) stays in a precise frame. Made `ARadialGravityTestBody` read the planet center dynamically (planet tagged "Planet") so the math survives rebasing. Compiled, reopened the editor, spawned body + manager, ran under Simulate. Also added `AUTHORIZATION.md` (standing build/install permissions) and a No-shortcut law, per Jaron's direction
+- Verified: Floating origin WORKS — `Saved/FloatingOrigin_run.log` shows rebase #1 moving the body from world X=637,200,000 to (0,0,0) and later rebases holding it at origin. BUT the body still doesn't fall: its world position drifts outward ~985 cm/s while physics velocity reads ~10 cm/s, and it jumps ~1 km per frame in the rebase log — it is being ejected by glitchy contacts with the Earth-sized single static mesh, not by gravity. Conclusion: the planet must use LOCAL collision near origin, not one giant mesh. Live audit after Simulate = clean 4-actor scene
+- Files changed: `Source/Kurearthis/FloatingOriginManager.*`, `Source/Kurearthis/RadialGravityTestBody.*` (dynamic center + relative logging), `_authoring/spawn_chaos_gravity_body.py`, `AUTHORIZATION.md` (new), `CHARTER.md` (No-shortcut law + auth pointer), `WORKFLOW.md` (start order), `PLANETARY_PROOF.md` (Proof 2c), `BUILDLOG.md`. Evidence in `Saved/*_chaos_floatingorigin.*` and `Saved/FloatingOrigin_run.log` (gitignored)
+- Notes: This is necessary foundation, not a shortcut — floating origin is required infrastructure and is proven working. The remaining failure is a real engine constraint (single giant collision mesh), now demonstrated, which makes the local-collision + custom-controller path necessary rather than a convenience. Editor closed/reopened for the build and re-verified clean (Crash/Restart law)
+- Next: Build a local surface-collision patch near origin (radial-up oriented, follows the floating origin) and verify a Chaos body rests on it under radial gravity
 
 ### 2026-06-20 — Builder: Claude
 - Did: Installed the .NET Framework 4.8.1 SDK automatically via `winget` (no admin prompt needed), which unblocked the C++ build. Moved `ARadialGravityTestBody` into `Source/Kurearthis`, re-enabled the module in the `.uproject`, compiled the editor target (success), reopened the editor, spawned the C++ body 1 km above the equator, and ran it under real Chaos physics in Simulate-In-Editor

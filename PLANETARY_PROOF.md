@@ -74,3 +74,31 @@ architecture must either keep physically-simulated bodies near the world origin
 (origin rebasing / floating frame) or drive surface movement with a custom
 double-precision integrator (as in 2a) rather than Chaos forces. This is exactly the
 kind of false assumption the charter requires us to disprove before building on it.
+
+### 2c — floating origin built, and a second hard finding — 2026-06-20
+Built the real foundation `AFloatingOriginManager` (`Source/Kurearthis/`): each tick
+it keeps a Focus actor within 500 m of the world origin by calling
+`UWorld::SetNewWorldOrigin`, so the whole world (planet included) recenters and the
+active region stays where double precision is exact. The gravity body now reads the
+planet center dynamically (planet found by the "Planet" tag) so the math survives
+rebasing. Compiled and run under Simulate.
+
+- **The floating origin works:** `Saved/FloatingOrigin_run.log` shows rebase #1 moving
+  the body from world X = 637,200,000 to (0,0,0), and subsequent rebases holding it
+  within ~0–1 m of origin. The body's world coordinate is now small and precise; the
+  planet center sits at the rebased `(-637,200,000, 0, 0)`.
+- **But the body still does not fall.** `Saved/RadialGravityProof_chaos_floatingorigin.log`:
+  the body's world POSITION drifts outward at ~985 cm/s while its physics linear
+  VELOCITY reads only ~10 cm/s — a contradiction. The rebase log shows the body
+  jumping ~1 km in single frames. That is not gravity losing to a weak force; the
+  dynamic body is being **ejected by glitchy contacts with the Earth-sized single
+  static collision mesh**. Floating origin fixes the body's coordinate precision, but
+  the planet is still one 6,371 km mesh whose collision near the body is imprecise.
+
+**Conclusion (the necessary architecture, now evidence-backed):** a planet cannot be a
+single giant static collision mesh. The surface under the player must be represented
+by **local collision near the world origin** (a terrain chunk / patch that follows the
+floating origin), and movement must use a **custom radial-gravity character controller**
+(UE's `CharacterMovementComponent` assumes flat +Z up). Given 2a/2b/2c, the custom
+controller is the necessary path, not a shortcut: stock Chaos on a giant far mesh is
+demonstrably unusable. Floating origin (2c) is the proven spine the next layer builds on.

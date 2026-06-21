@@ -2,8 +2,13 @@
 
 Read this before doing anything. These rules persist between sessions and may only be amended by explicit direction from Jaron.
 
+Builder permissions are recorded in `AUTHORIZATION.md` — read it too. It grants standing authority to install needed dependencies (Jaron approves any UAC/install prompt the AI cannot click), rebuild the editor, and use the strongest automation path, so builders implement instead of stalling or hacking around a setup step.
+
 ## Core law
 Build the smallest real playable foundation first. Earn complexity through working layers.
+
+## No-shortcut law
+When the right implementation needs a real foundation, build it. Do not substitute a smaller hack that defers the real problem to a later session — that shortcut pattern is why this is the third attempt. Necessary is not the same as over-scoped: build the necessary foundation for the current proof and no more.
 
 ## Assumption law
 Do not import unverified gameplay assumptions.

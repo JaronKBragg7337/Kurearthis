@@ -4,10 +4,11 @@ Read `CHARTER.md` first.
 
 ## Session start order
 1. Read `CHARTER.md`
-2. Read `WORKFLOW.md`
-3. Read `BUILDLOG.md`
-4. Connect to Unreal
-5. Verify live scene vs log (see below)
+2. Read `AUTHORIZATION.md` (standing build/install permissions)
+3. Read `WORKFLOW.md`
+4. Read `BUILDLOG.md`
+5. Connect to Unreal
+6. Verify live scene vs log (see below)
 
 ## Live scene verification (mandatory before new work)
 Before trusting the log, enumerate key scene actors and compare against what BUILDLOG.md says should exist.
