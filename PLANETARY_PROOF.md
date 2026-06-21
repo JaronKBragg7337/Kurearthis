@@ -139,3 +139,33 @@ QueryOnly planet, and the floating origin are the verified pieces; the integrato
 missing one. Open sub-question to resolve when the build resumes: whether the ~10×/10×
 `AddForce` deficits are a project physics-substep/units setting or an inherent
 `bAccelChange` behavior — but the controller does not depend on the answer.
+
+### 2e — custom swept integrator: a body falls and RESTS on the local patch (PASS) — 2026-06-21
+Built `ASweptGravityBody` (`Source/Kurearthis/`): a kinematic body (NO Chaos
+simulation) that each tick integrates radial gravity toward the planet center in
+double precision (UE5 `FVector` is double) and moves itself with
+`AddActorWorldOffset(sweep=true)`, so it collides against the LOCAL surface patch
+near the origin and stops. On a blocking hit it removes the into-surface velocity
+component (rest) and lightly damps the tangential part. It reads the planet center
+by the "Planet" tag, so it survives floating-origin rebasing. This is Proof 2a's
+proven double-precision integrator made into a runtime body — the path 2b/2c/2d
+showed Chaos forces could not provide. Setup: `_authoring/setup_swept_patch_proof.py`.
+
+- **Result (`Saved/RadialGravityProof.json`): `rested=true`.** Released ~1 km above
+  the patch, the body fell in **14.9 s** and rested at distance **637,105,000 cm** =
+  surface radius (637,100,000) + body radius (5,000), `local_up=(1,0,0)` radial,
+  `speed=0`. The fall is exact free-fall: at t=10 s speed was 9,806 cm/s ≈ 980×10,
+  pure −X with zero Y/Z drift — the correct dynamics Chaos `AddForce` was 10–100×
+  off on. This is a real settle from altitude, not the 2d in-band false-positive.
+- **Collision architecture confirmed:** the giant `ProofEarth` mesh is set
+  `NoCollision` (sweeps are queries, so even `QueryOnly` made the imprecise 6,371 km
+  mesh block the body 1 km above its surface — finding 2c extends to swept queries);
+  the small `LocalSurfacePatch` provides clean, precise collision near the origin.
+  The proof-2a `GravityRestMarker` was removed (it overlapped the release volume and
+  `set_collision_enabled(NoCollision)` did not survive PIE duplication).
+
+**Conclusion:** the planetary surface architecture is proven end to end — floating
+origin (2c) + local surface patch (2d) + a custom double-precision swept integrator
+(2e) make a body fall under radial gravity and rest on the surface with radial up,
+near the world origin where everything is precise. This is the foundation a
+player-controlled pawn (next) builds on.
