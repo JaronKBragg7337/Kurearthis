@@ -55,17 +55,19 @@ for a in actors:
                                PAWN_LABEL, MANAGER_LABEL):
         actor_sub.destroy_actor(a)
 
-# Follower patch so the player can roam the whole sphere (re-centers under the pawn).
+# FIXED large patch (NOT a follower) so walking feels right — the ground stays put in
+# the world and the player moves across it. A single follower tile glues the ground to
+# the player (no sense of motion); seamless infinite roaming needs a streamed tile grid
+# (deferred). 15 km wide gives ~7.5 km of travel in any direction for the feel test.
+# Focus is left unset, so ASurfacePatch.Tick early-returns and the patch never moves.
 patch = actor_sub.spawn_actor_from_class(
     unreal.SurfacePatch, unreal.Vector(PATCH_CENTER_X, 0.0, 0.0), unreal.Rotator())
 patch.set_actor_label(PATCH_LABEL)
-patch.set_actor_scale3d(unreal.Vector(PATCH_THICK_SCALE, PATCH_EXTENT_SCALE, PATCH_EXTENT_SCALE))
+patch.set_actor_scale3d(unreal.Vector(PATCH_THICK_SCALE, 15000.0, 15000.0))
 
 pawn = actor_sub.spawn_actor_from_class(unreal.RadialGravityPawn, PAWN_SPAWN, unreal.Rotator())
 pawn.set_actor_label(PAWN_LABEL)
-pawn.tags.append(unreal.Name("Focus"))
 pawn.set_editor_property("DebugDriveWorldDir", unreal.Vector(0.0, 0.0, 0.0))  # input-driven
-patch.set_editor_property("Focus", pawn)
 
 manager = actor_sub.spawn_actor_from_class(
     unreal.FloatingOriginManager, unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator())
