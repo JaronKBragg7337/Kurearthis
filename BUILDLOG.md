@@ -32,6 +32,13 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 
 ## Recent entries
 
+### 2026-06-21 — Builder: Codex (Agent Workbench capability session, not game build)
+- Did: Built and published a separate private local-first Agent Workbench at `C:\Users\lilli\Projects\agent-workbench`: machine/auth inventory, SQLite job ledger, policy router, seven constrained workers, Ollama/Codex/Claude adapters, scheduler/recovery, trusted-revision build gate, React dashboard, and local Phoenix telemetry. Installed Ollama + GPU-proven `qwen3.5:4b`, standalone Codex CLI, and Claude Code. Registered localhost server/scheduler tasks. Kurearthis is configured read/draft-only; no persistent public-repo self-hosted runner was created.
+- Verified: Workbench lint + 21 tests + production dashboard build + Docker config + live smoke test all pass; Ollama benchmark passed on the RTX 4060; dashboard/API/Phoenix and scheduled workers are live. Re-read project law and remotely audited Unreal afterward: `PlanetaryProof` contains exactly `ProofEarth`, `GravityRestMarker`, `LocalSurfacePatch`, `ChaosGravityBody`, and `FloatingOriginManager` — no STATE DIVERGENCE and no game-build changes.
+- Files changed: capability/handoff docs only (`PASTE_INTO_NEW_CHAT.txt`, `AGENT_CAPABILITIES/**`, `BUILDLOG.md`, `BUILDLOG_ARCHIVE.md`); workbench code lives in its separate private repo.
+- Notes: Ollama is the reliable local default. Codex CLI is authenticated but temporarily quota-limited; Claude Code is installed but awaits interactive login. The workbench cannot override Kurearthis law or expand its own project permissions.
+- Next: Keep expanding capabilities if Jaron asks; when he explicitly resumes the build, implement the custom direct radial-gravity integrator with swept movement so the body falls and rests on `LocalSurfacePatch`.
+
 ### 2026-06-21 — Builder: Codex (capability session, not game build)
 - Did: Kept the Unreal build paused and expanded machine-level, cross-project inspection capability. Installed Tesseract OCR plus 163 language models, Poppler, qpdf, Ghostscript, and ExifTool through Scoop. Added `_authoring/document_stack_smoketest.py`. Audited Codex machine parity and discovered Scoop, Go, Rust, Java 21, and Git LFS were already installed but undocumented. Corrected stale capability docs that still claimed Unreal remote execution and standalone .NET were unavailable.
 - Verified: exact `KUREARTHIS OCR PROOF 58021` OCR match on a generated source image and again after ImageMagick PDF creation + Poppler rendering; qpdf reported no syntax/stream errors; Ghostscript rendered the PDF; ExifTool read PNG dimensions/type; 163 Tesseract models available. Live Unreal scene was not modified.
@@ -93,10 +100,3 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 - Files changed: `CHARTER.md`, `WORKFLOW.md`, `BUILDLOG.md`
 - Notes: Planetary-first is an architecture-validation order, not permission to build a giant solar system at once. Economy, plots, placement, procedural galaxies, and orbital simulation remain deferred until the four planetary proofs pass.
 - Next: Create `PlanetaryProof` with one spherical body at a deliberate, documented radius and verify that single-body scale proof
-
-### 2026-06-20 — Builder: Codex
-- Did: Created the Unreal Engine 5.8 project scaffold and saved a small Basic level as `Content/Foundation.umap`; set it as the editor and game startup map
-- Verified: Unreal Python actor audit reported exactly 8 actors: Floor, PlayerStart, DirectionalLight, SkyLight, SkyAtmosphere, ExponentialHeightFog, VolumetricCloud, and SM_SkySphere; level save confirmed on disk
-- Files changed: `Kurearthis.uproject`, `.gitignore`, `Config/DefaultEngine.ini`, `Config/DefaultGame.ini`, `Config/DefaultInput.ini`, `Content/Foundation.umap`, `ASSETS_MANIFEST.md`, `BUILDLOG.md`
-- Notes: Initial bare project opened Unreal's unsaved 138-actor Open World template; it was audited, not saved, and replaced with the small Basic level. Local checkout was missing at session start and was restored from the public GitHub remote. No live/log divergence was found before work began.
-- Next: Add one grounded controllable player to `Foundation` and verify movement in Play-in-Editor

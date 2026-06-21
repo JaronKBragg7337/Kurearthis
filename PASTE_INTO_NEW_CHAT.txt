@@ -30,10 +30,15 @@ WHERE THE GAME BUILD STANDS (from BUILDLOG / PLANETARY_PROOF.md):
 - Findings 2b/2c: stock Chaos physics fails at planetary absolute coordinates; floating
   origin (AFloatingOriginManager) works but a single Earth-sized static collision mesh
   ejects the body. So the planet CANNOT be one giant mesh.
-- NEXT (Next up #1): build a LOCAL surface-collision patch near the world origin (oriented
-  to radial up, following the floating origin) and verify a Chaos body falls under radial
-  gravity and RESTS on it. Then a custom radial-gravity character controller. This is the
-  necessary path — do NOT shortcut it (No-shortcut law).
+- The LOCAL surface-collision patch now exists and `ProofEarth` is QueryOnly. Chaos
+  `AddForce` was proven quantitatively unreliable (~100× too slow even at origin).
+- NEXT (Next up #1): build a CUSTOM radial-gravity integrator/controller using direct
+  integration and swept movement so the body falls and RESTS on `LocalSurfacePatch`.
+  Do not return to Chaos forces or replace this with a shortcut.
+- Cross-project Agent Workbench is installed at `C:\Users\lilli\Projects\agent-workbench`:
+  localhost dashboard/API on port 7331, Phoenix traces on 6006, Ollama `qwen3.5:4b`,
+  constrained workers, scheduler, recovery, and capability inventory. It is a helper,
+  not project law; Kurearthis remains read/draft-only there until explicitly changed.
 
 HOW TO WORK:
 - Before new work: open the editor, run `python _authoring/ue_remote.py --file _authoring/live_scene_audit.py`,
@@ -44,4 +49,4 @@ HOW TO WORK:
   to BUILDLOG, commit, push, then stop.
 
 START by reporting: current state from BUILDLOG, any live/log mismatch, and the exact next step.
-Then ask me whether to proceed with the build or keep expanding capabilities.
+Then ask me whether to proceed with the custom integrator build or keep expanding capabilities.

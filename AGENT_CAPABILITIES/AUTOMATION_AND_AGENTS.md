@@ -48,7 +48,7 @@ So turning on loops is mostly *wiring a trigger* onto a system that's already sh
 | Loop | Trigger | Value | Guardrail |
 |---|---|---|---|
 | Physics regression | on push / schedule | run `run_physics_harness.py`, flag if a known-good result regresses | read-only report; no auto-edits |
-| Build check (self-hosted) | on push | compile the C++ (engine present locally) | self-hosted runner, editor closed |
+| Trusted local build check | human-approved revision | compile C++ with the local engine | no persistent public-repo runner; exact clean revision/branch/remote gate; editor closed |
 | Autonomous chunk loop | `/loop` or scheduled agent | do the next `BUILDLOG` item, verify, commit, write next | small chunks; stop on ambiguity/failure |
 | Nightly capability re-verify | schedule | run `SESSION_WARMUP` checks, refresh anything down | report-only |
 
@@ -62,14 +62,15 @@ So turning on loops is mostly *wiring a trigger* onto a system that's already sh
 | Sound designer | SoX, ffmpeg | — |
 | Tech writer / docs | Pandoc, Graphviz | — |
 | Level designer | **remote exec can build levels programmatically** | level-gen scripts |
-| DevOps / release | GitHub Actions CI, gh | UE packaging pipeline, self-hosted runner |
+| DevOps / release | GitHub Actions CI, gh, Agent Workbench trusted-build gate | UE packaging pipeline (local, gated; no persistent public-repo runner) |
 | Data / telemetry analyst | Python | pandas/numpy/matplotlib (pip), a metrics sink |
 | Security | `/security-review` skill | dependency/secret scanning in CI |
 | Localization | — | text-extraction + po/gettext if/when needed |
 | Producer / orchestrator | BUILDLOG, tasks, this doc | the loop trigger itself |
 
 ## Bottom line
-The system is already best-practice-shaped for autonomy. The remaining work is
-(1) optionally add the data/security tooling above, (2) define exact stop
-conditions, then (3) wire a trigger (`/loop`, scheduled agent, or CI) onto the
-existing chunk→verify→commit→next cycle. Do it on a small, reversible loop first.
+The private cross-project Agent Workbench now supplies the loop infrastructure:
+local Ollama routing, a ledger, constrained workers, scheduling, recovery, and
+telemetry. Kurearthis is intentionally registered read/draft-only. The next safe
+progression is to prove report-only and allowlisted regression loops before any
+write or build permission is considered. Do it on a small, reversible loop first.

@@ -48,13 +48,11 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 - **Best pattern:** plain `git add/commit/push`. Attribution trailers per WORKFLOW. Rebase onto `origin/main` before pushing (other agents push too).
 
 ## GitHub CLI (gh)
-- **Status:** Installed (2.93.0) but **not authenticated** as of the live Codex
-  check on 2026-06-21. A prior Claude session authenticated it, but that state
-  did not persist.
-- **When authenticated:** create/manage PRs, issues, `gh api`, releases.
-- **Current path:** repo push/pull still works through plain `git` and Windows
-  Credential Manager. Run `gh auth login` with Jaron's browser approval when an
-  API/PR workflow actually needs it; always verify with `gh auth status`.
+- **Status:** Installed (2.93.0) and authenticated as `JaronKBragg7337` on
+  2026-06-21 with `repo` + `workflow` scope.
+- **Use:** create/manage PRs, issues, `gh api`, releases, and CI inspection.
+- **Gotcha:** auth can lapse independently of plain Git Credential Manager.
+  Always verify `gh auth status` immediately before API/PR work.
 
 ## winget (dependency installs)
 - **Status:** Active — used to install the .NET Framework 4.8.1 SDK this session
@@ -73,3 +71,21 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 - **Gotcha:** after first install in an already-running agent app, refresh
   `TESSDATA_PREFIX` from the user environment or restart the app. The smoke test
   automatically falls back to Scoop's language-data path.
+
+## Agent Workbench — cross-project control plane
+- **Status:** Active at `C:\Users\lilli\Projects\agent-workbench` (private repo).
+- **UI/API:** `http://127.0.0.1:7331`; Phoenix traces:
+  `http://127.0.0.1:6006`; both bind to localhost only.
+- **What it provides:** live capability/auth inventory, SQLite job/event ledger,
+  deterministic task routing, warmup/handoff drafts, seven constrained workers,
+  scheduled recovery/scouting/telemetry, and a trusted-revision build gate.
+- **Model adapters:** Ollama `qwen3.5:4b` is the always-available local default
+  and is GPU-proven. Codex CLI is installed/authenticated but can be quota-limited.
+  Claude Code is installed but remains disabled until interactive login succeeds.
+- **Kurearthis boundary:** configured read/draft-only (`write=false`,
+  `build=false`, `network=false`). It cannot override this repo's Charter,
+  Workflow, live-audit law, or human checkpoints.
+- **Verify:** `pwsh -File C:\Users\lilli\Projects\agent-workbench\scripts\smoketest.ps1`.
+- **Security:** no persistent self-hosted GitHub runner for this public repo.
+  Public PR code is untrusted; any future host-local build must pass the exact
+  revision/branch/remote/clean-tree gate and explicit project build permission.
