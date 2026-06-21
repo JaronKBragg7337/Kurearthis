@@ -49,25 +49,23 @@ if "Planet" not in [str(t) for t in planet.tags]:
     planet.tags.append(unreal.Name("Planet"))
 planet.static_mesh_component.set_collision_enabled(unreal.CollisionEnabled.NO_COLLISION)
 
-patch = by_label.get(PATCH_LABEL)
-if patch is None:
-    patch = actor_sub.spawn_actor_from_class(
-        unreal.StaticMeshActor, unreal.Vector(PATCH_CENTER_X, 0.0, 0.0), unreal.Rotator())
-    patch.set_actor_label(PATCH_LABEL)
-    cube = unreal.EditorAssetLibrary.load_asset("/Engine/BasicShapes/Cube.Cube")
-    patch.static_mesh_component.set_static_mesh(cube)
-    patch.set_actor_scale3d(unreal.Vector(PATCH_THICK_SCALE, PATCH_EXTENT_SCALE, PATCH_EXTENT_SCALE))
-    patch.static_mesh_component.set_collision_profile_name("BlockAll")
-    patch.static_mesh_component.set_simulate_physics(False)
-
-# Clear prior dynamic test actors so only the playable pawn remains.
+# Replace any prior patch (static or follower) + dynamic test actors.
 for a in actors:
-    if a.get_actor_label() in ("SweptGravityBody", "ChaosGravityBody", PAWN_LABEL, MANAGER_LABEL):
+    if a.get_actor_label() in (PATCH_LABEL, "SweptGravityBody", "ChaosGravityBody",
+                               PAWN_LABEL, MANAGER_LABEL):
         actor_sub.destroy_actor(a)
+
+# Follower patch so the player can roam the whole sphere (re-centers under the pawn).
+patch = actor_sub.spawn_actor_from_class(
+    unreal.SurfacePatch, unreal.Vector(PATCH_CENTER_X, 0.0, 0.0), unreal.Rotator())
+patch.set_actor_label(PATCH_LABEL)
+patch.set_actor_scale3d(unreal.Vector(PATCH_THICK_SCALE, PATCH_EXTENT_SCALE, PATCH_EXTENT_SCALE))
 
 pawn = actor_sub.spawn_actor_from_class(unreal.RadialGravityPawn, PAWN_SPAWN, unreal.Rotator())
 pawn.set_actor_label(PAWN_LABEL)
+pawn.tags.append(unreal.Name("Focus"))
 pawn.set_editor_property("DebugDriveWorldDir", unreal.Vector(0.0, 0.0, 0.0))  # input-driven
+patch.set_editor_property("Focus", pawn)
 
 manager = actor_sub.spawn_actor_from_class(
     unreal.FloatingOriginManager, unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator())

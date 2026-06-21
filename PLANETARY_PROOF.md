@@ -222,3 +222,24 @@ is COMPLETE.** Foundation proven end to end: Earth-scale body (1) → radial gra
 integrator (2e) → custom pawn movement (2f) → playable, human-confirmed (2g). Next
 milestones: let the surface follow the player so they can roam the whole sphere, then
 proof 3 (surface → atmosphere → space) and proof 4 (a second body).
+
+### 2h — roaming: the surface patch follows the player (PASS, head-less) — 2026-06-21
+Built `ASurfacePatch` (`Source/Kurearthis/`): a local collision patch that re-centers
+and re-orients under the focus (the pawn) every tick (TG_PrePhysics, before the pawn's
+grounding sweep) — it sits tangent to the sphere directly beneath the pawn, top face at
+the surface radius, up = local radial. So the pawn is always over solid ground and can
+roam without reaching the patch edge. This is the first step of the terrain streaming in
+`WORLD_MODEL.md` (one follower tile now; a streamed grid later). Setup:
+`_authoring/setup_pawn_roam_proof.py`.
+
+- **Result (`Saved/RadialGravityProof.json`):** the pawn driven +Y at 500 m/s for ~20 s
+  traveled **10,086 m** — **4× past the old 2.5 km patch half-width** — and stayed
+  grounded the entire way: `grounded=true`, `height_above_surface ≈ 0.1 cm`,
+  `vertical_vel=0`, `capsule_up_dot_radial=1.0`. Only 1 ungrounded tick (the initial 2 m
+  drop). `local_up` tilted to `(1, 0.001583, 0)`, and 0.001583 rad = arc/radius
+  (1,008,589 / 637,100,000) — radial up tracked the curvature exactly across 10 km.
+- The playable scene (`setup_pawn_play.py`) now uses the follower patch, so Play roaming
+  is ready for Jaron's test.
+
+**Status:** roaming LOGIC proven head-less. Pending: Jaron walks far in Play and confirms
+he never falls off / the ground stays under him (human-judgment).
