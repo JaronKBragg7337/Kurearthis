@@ -278,3 +278,32 @@ Play (2026-06-21)** — he walked continuously with no fall-off and no pop/snap 
 and going"). The lack of a sense of progress is the planet being Earth-scale honest
 (~20,015 km to the antipode, ~19 days' walk at 12 m/s) — reference cues come with Proof 3
 (sky/horizon) and later real landmarks. **CHARTER proof #2 (incl. real roaming) is DONE.**
+
+## Proof 3 — surface → atmosphere → dark space (PASS, head-less screenshots) — 2026-06-21
+Added a planetary-scale `SkyAtmosphere` (`SurfaceAtmosphere`) to `PlanetaryProof`:
+planet center at the component transform (world origin = `ProofEarth` center),
+`BottomRadius = 6371 km` (= ProofEarth surface), `AtmosphereHeight = 100 km`. `SurfaceSun`
+is marked the atmosphere sun light; `SurfaceSky` is in real-time capture so ambient comes
+from the sky. Setup: `_authoring/setup_atmosphere_proof.py`.
+
+- **Verified (off-screen captures, `_authoring/capture_atmosphere_proof.py`):** three
+  altitudes show the transition. `atmo_surface` (~300 m up, horizon look) — bright blue
+  sky fades through a bright horizon-glow limb into black space. `atmo_low` (~318 km up) —
+  dense uniform blue (deep in the atmospheric column). `atmo_space` (~4,800 km up) — the
+  planet renders as a blue scattering body that fades to black at the limb against space.
+  Atmosphere present + thinning into black is demonstrated. (PNGs under
+  `Saved/Screenshots/atmo_*` — gitignored evidence.)
+- **Floating-origin in Play:** the atmosphere sits at the planet center (world origin).
+  `SetNewWorldOrigin` rebasing shifts all actors uniformly, so `SurfaceAtmosphere` stays
+  coincident with the planet center during Play (the same uniform-shift the tiles + pawn
+  rely on). Argued correct from the geometry; the live in-Play view (fly up, watch it
+  thin) is the optional human confirmation — the editor captures already prove the render.
+- **Honest limitation (recorded, not hidden):** stock `ExponentialHeightFog` is keyed to
+  world-Z height, not radial altitude, so on a sphere where "up" varies it is wrong away
+  from one point — it is NOT used. SkyAtmosphere's aerial perspective gives the radial
+  haze. A radial ground fog, if wanted, is future custom work. Cosmetics: the +X surface
+  shot is rolled 90° (radial up = world +X maps to image-horizontal); a faint mesh seam
+  is visible on the planet limb. Neither affects the atmosphere proof.
+
+**Status:** surface→atmosphere→space visual transition PROVEN via head-less captures.
+Optional: Jaron flies up in Play to confirm the live transition + atmosphere alignment.
