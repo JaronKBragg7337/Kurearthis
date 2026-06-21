@@ -16,6 +16,7 @@ to use a capability, or when something that "should" work doesn't.
 | Capability | Check | If down, refresh |
 |---|---|---|
 | Unreal editor open | `Get-Process UnrealEditor` | `Start-Process "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe" "<root>\Kurearthis.uproject"` (wait ~1–3 min) |
+| Editor Python over socket | `python _authoring/ue_remote.py --stmt "print(1)"` | if "no editor responded": editor must be open AND restarted since `bRemoteExecution` was enabled (DefaultEngine.ini). Primary way to run editor Python — no GUI. |
 | C++ module fresh after source edits | did `Source/Kurearthis/*` change? | close editor → `Build.bat KurearthisEditor Win64 Development -Project=...` → reopen |
 | git push/pull | `git fetch` | credential manager handles it; if it prompts, Jaron signs in |
 | `gh` (PRs/issues/api) | `gh auth status` | `gh auth login` (web device code → Jaron authorizes in browser) |

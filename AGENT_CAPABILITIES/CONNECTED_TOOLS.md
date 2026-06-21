@@ -7,11 +7,19 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 
 ---
 
-## Unreal editor control — Python console + GUI automation (NOT an MCP)
-- **Scope:** [CLAUDE-ENV] — this is how the *Claude* session drives the editor (no
-  Unreal MCP was loaded). Codex should use whatever editor tooling its own session
-  has; verify before assuming.
-- **Status:** Active, proven 2026-06-20
+## Unreal editor control — Python REMOTE EXECUTION (primary, 2026-06-20)
+- **Status:** Active, proven 2026-06-20. `bRemoteExecution=True` in DefaultEngine.ini.
+- **How:** run editor Python from the command line over a localhost socket — NO GUI:
+  - `python _authoring/ue_remote.py --stmt "import unreal; ..."`
+  - `python _authoring/ue_remote.py --file _authoring/<script>.py`
+  - `python _authoring/ue_remote.py --eval "<expr>"`
+  Output (prints/errors) comes back to stdout/stderr; scripts also write to `Saved/`.
+- **Requires:** editor open AND restarted since remote exec was enabled. Localhost only (TTL 0).
+- **This replaces** the old clipboard-paste-into-console + Win32-click method (kept below as fallback only if the socket is unavailable).
+
+## Fallback: console paste + GUI automation — [CLAUDE-ENV]
+- Use ONLY if remote execution is unavailable. How the Claude session drove the editor before remote exec: clipboard `py "abs/path"` → Win32 click console → Ctrl+V → Enter; Win32 clicks for Simulate/Stop/dialogs.
+- **Status:** Active fallback, proven 2026-06-20
 - **What it can do:**
   - Enumerate live scene actors (verify state vs log) and read transforms
   - Import static meshes (`AssetImportTask`), create/save levels, spawn/configure actors

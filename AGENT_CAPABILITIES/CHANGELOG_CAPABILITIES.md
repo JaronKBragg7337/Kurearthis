@@ -8,6 +8,12 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 
 ---
 
+## 2026-06-20 — Capability upgrade #1: Unreal Python remote execution (Claude)
+- Changed by: Claude
+- Now POSSIBLE: run editor Python from the command line over a localhost socket (`python _authoring/ue_remote.py --file/--stmt/--eval`). Enabled via `bRemoteExecution=True` in `Config/DefaultEngine.ini`; uses the engine's `remote_execution.py`. Verified: ran `live_scene_audit.py` remotely (Foundation, 8 actors) with no GUI.
+- Replaces the fragile clipboard-paste-into-console + Win32-click workflow (kept as fallback). Requires the editor open and restarted after enabling.
+- Source: live test 2026-06-20.
+
 ## 2026-06-20 — Fixed gh + Docker; scoped agent-specific facts (Claude)
 - Changed by: Claude (Jaron approved the gh browser authorization)
 - Now POSSIBLE: `gh` is authenticated (JaronKBragg7337) → PRs/issues/`gh api` work; Docker daemon is running (29.5.3). Both were "not finished setup," not real blockers.
