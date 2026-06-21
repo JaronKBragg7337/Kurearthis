@@ -8,6 +8,12 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 
 ---
 
+## 2026-06-21 — Capability upgrades #3 + #4 (Claude)
+- Changed by: Claude (Jaron approved the gh `workflow` scope in the browser)
+- #3 CI: `.github/workflows/ci.yml` runs on every push (GitHub-hosted) — compiles authoring Python, validates `Kurearthis.uproject`, checks C++ files present, no build artifacts tracked, docs present. Verified: first run = success in 7s. Required adding the `workflow` scope to gh's token. Full C++ compile still needs the engine (local or a self-hosted runner — documented).
+- #4 Scripted physics harness: `python _authoring/run_physics_harness.py [seconds]` runs a Simulate-In-Editor physics test with NO GUI (start/stop via `LevelEditorSubsystem.editor_play_simulate()`/`editor_request_end_play()` over remote exec) and prints the result JSON. Verified end-to-end; editor returns clean.
+- Source: live runs 2026-06-21.
+
 ## 2026-06-20 — Capability upgrade #1: Unreal Python remote execution (Claude)
 - Changed by: Claude
 - Now POSSIBLE: run editor Python from the command line over a localhost socket (`python _authoring/ue_remote.py --file/--stmt/--eval`). Enabled via `bRemoteExecution=True` in `Config/DefaultEngine.ini`; uses the engine's `remote_execution.py`. Verified: ran `live_scene_audit.py` remotely (Foundation, 8 actors) with no GUI.

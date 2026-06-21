@@ -24,11 +24,16 @@ Do not mark a workflow as proven unless Jaron or a verifiable output confirmed i
 - **Verified by:** built `RadialGravityTestBody` and `FloatingOriginManager`, spawned them from Python.
 - **Gotchas:** needs .NET 4.8.1 SDK; Target.cs `BuildSettingsVersion.V7`; don't leave an uncompilable module in `.uproject` (bricks the editor with "Missing target file").
 
-## Run real physics via Simulate-In-Editor + read result
+## Scripted physics harness (NO GUI) — primary
 - **Status:** PROVEN 2026-06-20
-- **Flow:** spawn physics actor + save level → play-mode menu → **Simulate** (GUI click) → wait → read `Saved/RadialGravityProof.*` → **Stop** (red button, Win32 click) → re-audit scene.
-- **Verified by:** the Chaos gravity runs (Proof 2b/2c).
-- **Gotchas:** `get_editor_world()` returns `<none>` while Simulate is active — stop first, then audit.
+- **Flow:** `python _authoring/run_physics_harness.py [seconds]` — it sets up the
+  scene, starts Simulate via `LevelEditorSubsystem.editor_play_simulate()`, waits,
+  stops via `editor_request_end_play()`, and prints `Saved/RadialGravityProof.json`.
+  All over remote execution; no Simulate/Stop button clicks.
+- **Verified by:** ran the gravity test scripted; editor returned to a clean 4-actor
+  scene (`is_in_play_in_editor()=False`).
+- **Gotchas:** `get_editor_world()` returns `<none>` while Simulate is active — stop first, then audit. Run physics math in doubles (see KNOWN_LIMITS).
+- **Old GUI method** (play-mode menu → Simulate, Win32-click Stop) is the fallback only if remote exec is unavailable.
 
 ## Install a dependency via winget
 - **Status:** PROVEN 2026-06-20 (.NET Framework 4.8.1 SDK)
