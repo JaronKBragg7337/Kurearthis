@@ -307,3 +307,33 @@ from the sky. Setup: `_authoring/setup_atmosphere_proof.py`.
 
 **Status:** surface→atmosphere→space visual transition PROVEN via head-less captures.
 Optional: Jaron flies up in Play to confirm the live transition + atmosphere alignment.
+
+## Proof 4 — a second body coexisting at distance (PASS, head-less) — 2026-06-21
+Added `ProofMoon` (the in-house planet mesh scaled to a 1,737 km moon) at the real Moon
+distance (384,400 km = 3.844e10 cm) along +Y from `ProofEarth`. Visual-only (NoCollision)
+and deliberately NOT "Planet"-tagged, so the pawn/tiles keep ProofEarth as the gravity
+center. Setup: `_authoring/setup_second_body_proof.py`; captures:
+`_authoring/capture_second_body_proof.py`.
+
+- **First body unaffected (`Saved/RadialGravityProof.json` + `.log`, harness 40 s with the
+  moon present):** pawn driven +Y at 500 m/s roamed **20,667 m** and stayed grounded the
+  whole way (125 ticks, only the initial 2 m drop ungrounded); `capsule_up_dot_radial=1.0`;
+  **`local_up=(0.999995, 0.003244, 0)` points to ProofEarth (+X), NOT to the moon (+Y)** —
+  the second body did not hijack the gravity center.
+- **Floating origin + roaming streaming unaffected (`Saved/TileGrid.json`):** active=9,
+  spawned=21, destroyed=12, current_cell=[4,0] — identical to Proof 2i without the moon.
+- **Rendering (captures):** `p4_earth_surface` — ProofEarth + atmosphere render exactly as
+  in Proof 3 (first body's rendering not broken). `p4_earthrise` — from near the moon both
+  bodies appear in one frame: ProofMoon a lit sphere in the foreground, ProofEarth a small
+  bright blue (atmosphere) body 384,400 km beyond. Earth also renders correctly as a lit
+  crescent when viewed from the moon's distance.
+- **Audit after:** 8 actors, no ghosts (`ProofEarth`, `SurfaceSun`, `SurfaceSky`,
+  `SurfaceAtmosphere`, `ProofMoon`, `SurfaceTileGrid`, `FloatingOriginManager`,
+  `RadialGravityPawn`).
+- **Note:** the moon is a static body — orbital motion / its own gravity well + surface are
+  later work (WORLD_MODEL.md). This proves coexistence (frame/gravity/rendering), which is
+  the Proof 4 claim. A faint mesh seam shows on each body (cosmetic, the base sphere's UV).
+
+**Status:** second body coexists at distance without breaking the first body's frame,
+gravity, or rendering. **All four planetary proofs (1 scale, 2 surface+gravity+roaming,
+3 atmosphere, 4 coexistence) now PASS.**
