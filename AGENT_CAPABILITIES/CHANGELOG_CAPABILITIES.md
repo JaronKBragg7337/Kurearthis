@@ -8,6 +8,16 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 
 ---
 
+## 2026-06-21 — Asset-production toolkit installed (Claude)
+- Changed by: Claude (Jaron requested; approved UAC where prompted)
+- Now POSSIBLE — the agent can produce real assets from scripts, not just placeholders:
+  - **Art/textures:** ImageMagick 7.1.2 (`magick`) + Inkscape 1.4.4 — generate/convert textures, icons, SVG→PNG.
+  - **Diagrams/docs:** Graphviz 15.1.0 (`dot`) + Pandoc 3.10 — diagrams from text, docs → PDF/DOCX. Verified by rendering `_authoring/diagrams/status.png`.
+  - **Audio:** SoX 14.4.2 (+ ffmpeg) — generate/process sound from scripts.
+  - **.NET + C++ tooling:** .NET SDK 8.0.422, CMake 4.3.3, Ninja 1.13.2 — build/run MCP servers and standalone tools.
+  - Earlier batch: uv, jq, ripgrep, ffmpeg, 7-Zip.
+- Source: live installs + version checks 2026-06-21. Inkscape/Graphviz need full paths (see SYSTEM_INVENTORY).
+
 ## 2026-06-21 — Capability upgrades #3 + #4 (Claude)
 - Changed by: Claude (Jaron approved the gh `workflow` scope in the browser)
 - #3 CI: `.github/workflows/ci.yml` runs on every push (GitHub-hosted) — compiles authoring Python, validates `Kurearthis.uproject`, checks C++ files present, no build artifacts tracked, docs present. Verified: first run = success in 7s. Required adding the `workflow` scope to gh's token. Full C++ compile still needs the engine (local or a self-hosted runner — documented).

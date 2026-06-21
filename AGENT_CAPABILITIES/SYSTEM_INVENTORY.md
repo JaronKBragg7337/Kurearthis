@@ -36,7 +36,12 @@ Do not trust this file blindly — verify live before relying on entries older t
 | VS Code | `%LOCALAPPDATA%\Programs\Microsoft VS Code` (`code` on PATH) | 2026-06-20 OK |
 | Docker | CLI 29.5.3 — **daemon running** (Docker Desktop started this session; `docker info` OK) | 2026-06-20 OK |
 | winget | 1.28.240 — works; can install deps (Jaron approves UAC prompts) | 2026-06-20 OK |
-| Dev CLIs | uv 0.11.17, jq 1.8.2, ripgrep 15.1.0, ffmpeg 8.1.1, 7-Zip — installed via winget (PATH refresh needed in-session) | 2026-06-21 OK |
+| Dev CLIs | uv 0.11.17, jq 1.8.2, ripgrep 15.1.0, ffmpeg 8.1.1, 7-Zip | 2026-06-21 OK |
+| Art/textures | ImageMagick 7.1.2 (`magick`), Inkscape 1.4.4 (`C:\Program Files\Inkscape\bin\inkscape.exe`) | 2026-06-21 OK |
+| Diagrams/docs | Graphviz 15.1.0 (`C:\Program Files\Graphviz\bin\dot.exe`), Pandoc 3.10 | 2026-06-21 OK |
+| Audio | SoX 14.4.2 (`sox`), ffmpeg | 2026-06-21 OK |
+| .NET + C++ tooling | .NET SDK 8.0.422 (`dotnet`), CMake 4.3.3, Ninja 1.13.2 | 2026-06-21 OK |
+| Note | Inkscape & Graphviz aren't on PATH — use full paths above, or refresh PATH from registry in-session | 2026-06-21 |
 
 ## NOT present / corrected assumptions
 - **No standalone .NET (Core) SDK** on PATH — `dotnet --list-sdks` empty. UE uses a

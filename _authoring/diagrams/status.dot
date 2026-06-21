@@ -1,0 +1,26 @@
+digraph Kurearthis {
+  rankdir=LR; bgcolor="white";
+  node [shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11];
+  edge [fontname="Segoe UI", fontsize=9, color="#666666"];
+
+  subgraph cluster_proofs {
+    label="Planetary proofs"; color="#cccccc"; style=filled; fillcolor="#f5f5f5";
+    p1 [label="Proof 1\nEarth-scale body\n(DONE)", fillcolor="#bfe6c3"];
+    p2a [label="Proof 2a\nradial gravity model\n(DONE, integrator)", fillcolor="#bfe6c3"];
+    p2b [label="Proof 2b\nChaos fails at\nplanetary coords", fillcolor="#f6d8a8"];
+    p2c [label="Proof 2c\nfloating origin works,\nbut single mesh ejects", fillcolor="#f6d8a8"];
+    nxt [label="NEXT\nlocal collision patch +\nradial controller", fillcolor="#bcd6f0"];
+    p1 -> p2a -> p2b -> p2c -> nxt;
+  }
+
+  subgraph cluster_cap {
+    label="Toolchain (this session)"; color="#cccccc"; style=filled; fillcolor="#f5f5f5";
+    rx [label="remote exec\nue_remote.py", fillcolor="#bfe6c3"];
+    hz [label="physics harness\nrun_physics_harness.py", fillcolor="#bfe6c3"];
+    ci [label="CI on push", fillcolor="#bfe6c3"];
+    rx -> hz; 
+  }
+
+  hz -> nxt [label="tests", style=dashed];
+  ci -> nxt [label="guards", style=dashed];
+}
