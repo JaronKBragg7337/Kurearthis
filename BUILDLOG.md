@@ -6,25 +6,32 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 
 ## Current state
 - **Project:** Kurearthis
-- **Unreal status:** Planetary proofs 1–2 complete: `ProofEarth` has verified surface collision AND radial gravity + local-up are proven; `PlanetaryProof` holds `ProofEarth` plus a `GravityRestMarker` resting on the equator; `Foundation` remains the control map
+- **Unreal status:** Planetary proofs 1–2 complete. `ProofEarth` has verified surface collision; radial gravity + local-up proven by a double-precision integrator. **NOW A C++ PROJECT** (`Source/Kurearthis`, module `Kurearthis` compiles on UE 5.8). `PlanetaryProof` holds `ProofEarth`, `GravityRestMarker`, and `ChaosGravityBody`; `Foundation` remains the control map
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
-- **Git status:** Clean — radial gravity proof committed
-- **Last verified good state:** Body released 1 km above the equator (+X) fell purely along −X to the real surface (rest dist `637,099,968 cm`, ≈ nominal radius), with `local_up=(1,0,0)` and exactly zero Y/Z drift. Logged in `Saved/RadialGravityProof.json` + `.log`. Live Outliner = 2 actors (`ProofEarth`, `GravityRestMarker`)
+- **Git status:** Clean — radial gravity proof + Chaos-at-scale finding committed
+- **Last verified good state:** Live Outliner = 3 actors (`ProofEarth` @origin, `GravityRestMarker` @equator, `ChaosGravityBody` @`637,200,000,0,0`), verified after stopping Simulate — no ghosts. Integrator result in `Saved/RadialGravityProof_integrator.json`; Chaos run in `Saved/RadialGravityProof.json/.log`
 - **Current builder:** Claude
-- **Active blockers:** None (C++ runtime gravity component is written but its compile is gated on a `.NET Framework 4.8 SDK` install — needs admin)
+- **Active blockers:** None
 
 ## Known issues
-- The radial-gravity proof is a deterministic Newtonian integration colliding against the REAL `ProofEarth` mesh — it proves the architecture (radial g + radial up + rests on real surface) but is NOT yet the engine's Chaos physics. The real Chaos runtime body (`ARadialGravityTestBody`, in `_authoring/unreal_cpp/`) is written and ready but cannot compile until the `.NET Framework 4.8 SDK` is installed (the editor build pulls in `SwarmInterface`, which requires it; install needs admin/UAC).
+- **CRITICAL ARCHITECTURE FINDING (Proof 2b):** stock Chaos rigid-body physics does NOT work at true planetary absolute coordinates (~6.37e8 cm from world origin). A real Chaos body under radial gravity fell ~5× too slowly (12 cm/s at t=12s vs expected ~12,000), drifted ~37 km outward first, took ~70s to land, then slid tangentially (~3,750 cm/s) without resting, penetrating ~100 m. Radial direction + collision are correct; the solver DYNAMICS break down (large-world-coordinate float precision). The double-precision integrator (Proof 2a) was correct. See `PLANETARY_PROOF.md` Proof 2.
+- Implication: the game must keep simulated bodies near world origin (origin rebasing / floating frame) OR drive surface movement with a custom double-precision integrator — not raw Chaos forces at planetary coords. This decision gates the player/movement work.
 - No player-controlled pawn yet; local up is proven as a vector, not yet driven into a movement component.
-- Physics/trace math at ~6.37e8 cm is float32 (tens-of-cm ULP): equator rest landed −32 cm vs nominal, north-pole surface +672 cm vs nominal — expected scatter, do gravity/movement math in doubles.
-- `Foundation` is intentionally flat and must remain a control map, not become the game-world architecture.
+- Math at ~6.37e8 cm is float32 (tens-of-cm ULP): integrator equator rest −32 cm vs nominal, north-pole surface +672 cm vs nominal — expected scatter, do movement math in doubles.
+- `Foundation` is intentionally flat and must remain a control map.
 
 ## Next up
-1. Install the `.NET Framework 4.8 SDK` (admin), drop `_authoring/unreal_cpp/` back into `Source/`, compile, and re-run the fall with real Chaos physics to confirm the integrator result matches the engine.
-2. Then prove a controlled pawn standing on the surface with correct local up (orient capsule to radial up), still in `PlanetaryProof`.
-3. Defer atmosphere/space transition (proof 3) and the second body (proof 4) until a pawn stands and orients.
+1. Decide the movement-frame strategy given Proof 2b: (a) origin-rebasing so the player's region sits near world origin and Chaos is stable, or (b) a custom kinematic radial-gravity character controller in double precision. Recommend prototyping (b) first (smaller), as a controlled pawn standing on the surface with capsule oriented to radial up — still in `PlanetaryProof`.
+2. Defer atmosphere/space transition (proof 3) and the second body (proof 4) until a pawn stands and orients on the surface.
 
 ## Recent entries
+
+### 2026-06-20 — Builder: Claude
+- Did: Installed the .NET Framework 4.8.1 SDK automatically via `winget` (no admin prompt needed), which unblocked the C++ build. Moved `ARadialGravityTestBody` into `Source/Kurearthis`, re-enabled the module in the `.uproject`, compiled the editor target (success), reopened the editor, spawned the C++ body 1 km above the equator, and ran it under real Chaos physics in Simulate-In-Editor
+- Verified: **Chaos breaks down at planetary scale.** C++ trajectory log (`Saved/RadialGravityProof.log`): body should reach ~14,000 cm/s in ~14s under 980 cm/s²; instead ~12 cm/s at t=12s, drifted ~37 km outward, took ~70s to contact the surface, then slid tangentially at a stuck ~3,750 cm/s and never rested (penetrating ~100 m, drifting km in Y/Z). `up` stayed ≈`(1,0,0)` and it did hit the mesh — direction + collision correct, solver dynamics wrong. Contrast: the double-precision integrator (Proof 2a) fell in 14s and rested exactly on the surface. After stopping Simulate, live audit = clean 3-actor scene
+- Files changed: `Source/**` (C++ module, now canonical; removed parked `_authoring/unreal_cpp/`), `Kurearthis.uproject` (Modules), `_authoring/spawn_chaos_gravity_body.py`, `PLANETARY_PROOF.md` (Proof 2 section), `ASSETS_MANIFEST.md`, `BUILDLOG.md`. Build outputs (`Binaries/`, `Intermediate/`) are gitignored
+- Notes: The editor was closed for the build and reopened (Crash/Restart law honored: re-verified clean on reopen and again after Simulate). A Windows firewall prompt for the UBA build server appeared and was dismissed (Cancel) — inbound build-server networking is not needed. This is a genuine architectural finding, not a code bug: the same code near the origin would behave correctly
+- Next: Choose movement-frame strategy (origin rebasing vs custom double-precision character controller) and prototype a surface-standing pawn with radial up
 
 ### 2026-06-20 — Builder: Claude
 - Did: Proved radial gravity + local up on `ProofEarth`. Released a test body 1 km above the EQUATOR (+X) and integrated constant acceleration (980 cm/s²) toward the planet center, colliding against the real `ProofEarth` collision mesh via engine line traces. Left a visible `GravityRestMarker` resting on the surface and saved the level. Also wrote a forward-compatible C++ Chaos body (`ARadialGravityTestBody`) intended as the runtime path

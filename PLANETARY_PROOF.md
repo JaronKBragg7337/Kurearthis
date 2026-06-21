@@ -32,3 +32,45 @@ This chunk proves only that a reproducible spherical body can exist at the docum
 - Save/reopen result: passed; `PlanetaryProof` reopened with only `ProofEarth`
 
 The small radius difference comes from FBX/imported mesh bounds at the base-mesh scale. It is negligible for this representation proof but is recorded rather than hidden.
+
+## Proof 2 — radial gravity, local up, and a critical physics-scale finding — 2026-06-20
+
+Proof 2 was run two ways against the same real `ProofEarth` collision surface. A test
+body was released ~1 km above the **equator** (+X), where flat world gravity (−Z)
+would carry it sideways and never land — so only true radial gravity can make it
+fall to the surface.
+
+### 2a — deterministic radial-gravity integrator (PASS)
+Pure double-precision Newtonian integration (g = 980 cm/s² toward world origin),
+colliding via engine line traces against the real mesh. Script:
+`_authoring/prove_radial_gravity.py`.
+
+- Release: `(637,200,000, 0, 0)`; rest: `(637,099,968, 0, 0)`
+- Rest distance from center: `637,099,968 cm` (≈ nominal radius, −32 cm float32)
+- `local_up_at_rest = (1, 0, 0)` (radial); lateral drift `max|Y| = max|Z| = 0`
+- Trajectory: X fell straight toward center, speed rose at exactly g, Y/Z stayed 0.0
+
+This proves the architecture truth: gravity is radial toward the body center and a
+falling object's local up is the radial direction, not world +Z.
+
+### 2b — real Chaos rigid-body physics (REVEALS A HARD CONSTRAINT)
+A C++ `ARadialGravityTestBody` (parked in `_authoring/unreal_cpp/`) simulates real
+Chaos physics with default −Z gravity disabled and a per-tick radial acceleration
+toward the center. Run under Simulate-In-Editor. At ~6.371×10⁸ cm from the world
+origin the solver misbehaves badly:
+
+- Gravity integration is far too weak early: with constant 980 cm/s² the body should
+  reach ~14,000 cm/s in ~14 s, but it was at ~12 cm/s at t = 12 s, even drifted ~37 km
+  **outward** first, then acceleration slowly ramped up, taking ~70 s to reach the surface.
+- After contact it never rests: it slides tangentially along the surface at a stuck
+  ~3,750 cm/s, penetrating ~100 m, drifting kilometers in Y/Z.
+- Radial **direction** and **collision** are correct (`up` stays ≈ `(1,0,0)`, it does
+  hit the mesh) — only the solver **dynamics** break down.
+
+**Conclusion (architecture constraint):** stock Chaos rigid-body physics cannot be
+trusted for gravity/movement at true planetary absolute coordinates (~6,371 km from
+world origin) — a large-world-coordinate single-precision failure. The planetary
+architecture must either keep physically-simulated bodies near the world origin
+(origin rebasing / floating frame) or drive surface movement with a custom
+double-precision integrator (as in 2a) rather than Chaos forces. This is exactly the
+kind of false assumption the charter requires us to disprove before building on it.

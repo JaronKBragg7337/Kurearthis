@@ -2,5 +2,12 @@
 	"FileVersion": 3,
 	"EngineAssociation": "5.8",
 	"Category": "Games",
-	"Description": "Kurearthis grounded playable foundation"
+	"Description": "Kurearthis grounded playable foundation",
+	"Modules": [
+		{
+			"Name": "Kurearthis",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
 }
