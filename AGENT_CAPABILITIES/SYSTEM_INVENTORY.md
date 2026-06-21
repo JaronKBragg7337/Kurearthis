@@ -1,46 +1,60 @@
 # SYSTEM_INVENTORY.md
 Last updated: 2026-06-20
-Updated by: Perplexity AI (initial seed)
+Updated by: Claude (verified live on the machine)
 
 This file records what is ACTUALLY on the machine — not assumed, not guessed.
 Update this file whenever you discover, install, or confirm anything on the system.
 Do not trust this file blindly — verify live before relying on entries older than one week.
 
+> Note: "verified" entries below were run live in the Claude Code environment on
+> the date shown. Codex may run in a different environment — it should verify
+> independently and not assume parity.
+
 ---
 
 ## Machine
-- OS: Windows (user: lilli)
-- Primary project path: C:\Users\lilli\Documents\Unreal Projects\Kurearthis
+- OS: Windows 11 Home (10.0.26200), user: `lilli`
+- Shell available to agents: PowerShell 7+ (pwsh) and Git Bash (POSIX sh)
+- **Primary project path: `C:\Users\lilli\OneDrive\Desktop\Kurearthis`**
+  (NOTE: the project lives under OneDrive Desktop, which syncs to OneDrive — and
+  some file ops also surface in Google Drive. Not `Documents\Unreal Projects`.)
+- CPU: 24 physical / 32 logical cores; ~38 GB RAM
 
-## Confirmed installed applications
-| App | Version / Notes | Last verified |
+## Confirmed installed (verified 2026-06-20)
+| Thing | Version / path | Verified |
 |---|---|---|
-| Unreal Engine | UE5 (project exists and runs) | 2026-06-20 |
-| Blender | Installed, used in prior project for headless FBX export | 2026-06-20 |
-| Epic Games Launcher | Present (used to launch UE) | 2026-06-20 |
-| Docker | Installed — potential for containerized services | Unverified |
-| Git | Present (repo is live and pushing) | 2026-06-20 |
-| GitHub CLI (gh) | Used to create repos — confirmed working | 2026-06-20 |
+| Unreal Engine | **5.8** — `C:\Program Files\Epic Games\UE_5.8` | 2026-06-20 OK |
+| Visual Studio **Build Tools** 2022 | MSVC 14.44 toolchain (not full VS IDE) | 2026-06-20 OK |
+| .NET Framework **4.8.1 SDK** | `C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8.1` (installed this session via winget; required by UE C++ build) | 2026-06-20 OK |
+| Blender | **5.1.2** — `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe` (NOT on PATH) | 2026-06-20 OK |
+| Git | 2.54.0 — HTTPS remote via Windows **Credential Manager** (`credential.helper=manager`) | 2026-06-20 OK |
+| GitHub CLI `gh` | 2.93.0 installed — **NOT authenticated** (`gh auth status` = not logged in; no GH_TOKEN). See CONNECTED_TOOLS. | 2026-06-20 OK |
+| Node.js / npm | node v24.16.0 / npm 11.13.0 | 2026-06-20 OK |
+| Python | system `python` = 3.12.10; `py` launcher default 3.14 (`...\pythoncore-3.14-64`) | 2026-06-20 OK |
+| VS Code | `%LOCALAPPDATA%\Programs\Microsoft VS Code` (`code` on PATH) | 2026-06-20 OK |
+| Docker | CLI 29.5.3 installed — **daemon NOT running** (Docker Desktop not started) | 2026-06-20 OK |
+| winget | 1.28.240 — works; can install deps (Jaron approves UAC prompts) | 2026-06-20 OK |
 
-## Confirmed CLIs / tools
-| Tool | Notes | Last verified |
-|---|---|---|
-| `blender --background` | Headless Blender scripting proven in prior project | 2026-06-20 |
-| `gh` | GitHub CLI — used for repo management | 2026-06-20 |
-| `git` | Standard git operations | 2026-06-20 |
+## NOT present / corrected assumptions
+- **No standalone .NET (Core) SDK** on PATH — `dotnet --list-sdks` empty. UE uses a
+  bundled dotnet for UnrealBuildTool, so this is fine; don't assume `dotnet build`.
+- **No Unreal Engine MCP server in the Claude environment.** The live editor is
+  driven by its built-in Python console + GUI automation (see CONNECTED_TOOLS and
+  TESTED_WORKFLOWS). Earlier seed files assumed an Unreal MCP — that was wrong here.
 
-## Unverified / suspected installed
-- Docker Desktop — installed but not yet used in this project
-- Python — likely present (Blender embeds it; check system Python separately)
-- Node.js — unknown
-- VS Code — unknown
-- Visual Studio — likely (UE5 C++ projects need it)
+## How the editor is actually controlled (verified)
+- Project Python remote execution is DISABLED. Drive the editor's bottom **Console
+  Command** bar: set the clipboard to `py "C:/abs/path/script.py"`, click the
+  console field, paste (Ctrl+V), Enter. The script writes results to `Saved/` and
+  prints to `Saved/Logs/Kurearthis.log` (`LogPython:`), which agents then read.
+- Window focus / button clicks (Simulate, Stop, dialogs) are done with Win32
+  (`SetForegroundWindow`/`SetCursorPos`/`mouse_event`) and the Windows-MCP tools.
+  The Windows-MCP `Click`/`Type` `loc` param is buggy on this bridge (serializes
+  the list to a string) — use Win32 clicks instead.
 
-## Instructions for first session after this file is created
-Run the following checks and update this file with results:
-1. `blender --version` — confirm Blender version
-2. `gh --version` — confirm GitHub CLI version
-3. `docker --version` — confirm Docker presence
-4. `python --version` or `python3 --version` — confirm Python
-5. Confirm Unreal MCP server is installed and on what port
-6. List any MCP servers currently configured in Claude Code settings
+## Re-verify checklist for the next session
+1. `git --version`, `gh auth status` (still unauth?), `node --version`, `python --version`
+2. Blender path still `Blender 5.1`? `& "<path>" --version`
+3. `docker info` — daemon running yet?
+4. UE engine path still `UE_5.8`?
+5. Any Unreal/Blender MCP now actually present? (Check tool list / WATCHLIST.)

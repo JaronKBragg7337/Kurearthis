@@ -1,55 +1,49 @@
 # CONNECTED_TOOLS.md
 Last updated: 2026-06-20
-Updated by: Perplexity AI (initial seed)
+Updated by: Claude (verified)
 
 This file records tools that have been actively connected and tested in this project.
 For each tool: what it can do, what it cannot do, requirements, risks, and the best way to use it.
 
 ---
 
-## Unreal Engine MCP
-- **Status:** Active
-- **Last verified:** 2026-06-20
+## Unreal editor control — Python console + GUI automation (NOT an MCP)
+- **Status:** Active, proven 2026-06-20
 - **What it can do:**
-  - Enumerate scene actors (used to verify live state vs log)
-  - Import static mesh FBX files via `StaticMeshTools.import_file`
-  - Compile Blueprints
-  - Interact with the editor programmatically
-- **What it cannot do / known issues:**
-  - Unreliable during or immediately after destructive operations (delete all, large asset swaps)
-  - Requires Unreal editor to be OPEN and MCP server running — does not work headless
-  - A crashed session can leave ghost actors; always verify live scene before trusting logs
-- **Requirements:** Unreal editor open, MCP server process running on configured port
-- **Risks:** Ghost actors, stale state, crash during large imports
-- **Best pattern:** Enumerate actors first → compare with log → then proceed with work
+  - Enumerate live scene actors (verify state vs log) and read transforms
+  - Import static meshes (`AssetImportTask`), create/save levels, spawn/configure actors
+  - Set collision (`body_setup.collision_trace_flag`), run line traces, set viewport camera
+  - Start/stop **Simulate-In-Editor** to run real Chaos physics; read results from `Saved/`
+- **What it cannot do / gotchas:**
+  - No network Python remote execution (disabled) — must paste into the console bar
+  - Editor must be OPEN; a new/changed C++ module needs the editor CLOSED to build, then reopened
+  - `FHitResult` fields aren't direct attrs / `get_editor_property("blocking_hit")` fails — use `hit.to_dict()`
+  - `unreal.SystemLibrary.line_trace_single` returns `None` on no-hit (not an empty struct)
+  - `StaticMeshComponent` has no `recreate_physics_state()` in Python
+- **Best pattern:** write a `.py` to `_authoring/`, run via console, have it dump JSON to `Saved/`, read it back. Always audit live actors first (catches ghost actors).
 
----
+## C++ build (UnrealBuildTool)
+- **Status:** Active, proven 2026-06-20 (requires .NET Framework 4.8.1 SDK — installed)
+- **Build:** `& "C:\Program Files\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" KurearthisEditor Win64 Development -Project="<root>\Kurearthis.uproject" -WaitMutex -FromMsBuild`
+- **Gotchas:** editor must be closed; Target.cs must use `BuildSettingsVersion.V7`; a UBA firewall prompt may appear (Cancel it). Module: `Source/Kurearthis`.
 
 ## Blender (headless CLI)
-- **Status:** Active — proven in prior project
-- **Last verified:** 2026-06-20
-- **What it can do:**
-  - Run Python scripts headlessly: `blender --background --python _authoring/make_*.py`
-  - Generate and export FBX geometry without opening the GUI
-  - Model in meters (Unreal imports at cm scale)
-- **What it cannot do:** GUI-dependent operations, rendering final frames headlessly without config
-- **Requirements:** Blender installed, script in `_authoring/` folder
-- **Risks:** Blender version mismatches can break Python API calls — always test after Blender updates
-- **Best pattern:** Write script → test locally → export FBX → import via Unreal MCP
+- **Status:** Installed (Blender **5.1.2**), pipeline proven in prior project — NOT re-verified this session
+- **Run:** `& "C:\Program Files\Blender Foundation\Blender 5.1\blender.exe" --background --python _authoring/make_*.py`
+- **Gotchas:** Blender **5.1** is a major version — the prior project's scripts may need Python-API checks against 5.x. Export **FBX** (not glb), model in METERS.
 
----
+## Git (push/pull)
+- **Status:** Active — `git push`/`pull` work via Windows Credential Manager (HTTPS)
+- **Best pattern:** plain `git add/commit/push`. Attribution trailers per WORKFLOW. Rebase onto `origin/main` before pushing (other agents push too).
 
 ## GitHub CLI (gh)
-- **Status:** Active
-- **Last verified:** 2026-06-20
-- **What it can do:** Create repos, push commits, manage PRs and issues
-- **Requirements:** `gh` authenticated on the machine
-- **Best pattern:** Use for all repo operations — Jaron does not use GitHub UI manually
+- **Status:** Installed (2.93.0) but **NOT authenticated** (`gh auth status` = not logged in; no GH_TOKEN)
+- **Implication:** `gh pr create`, `gh issue`, `gh api` will FAIL until `gh auth login` or a token is set. Repo push/pull does NOT need gh (git handles it). If you need gh, ask Jaron to authenticate or set GH_TOKEN.
 
----
+## winget (dependency installs)
+- **Status:** Active — used to install the .NET Framework 4.8.1 SDK this session
+- **Pattern:** `winget install --id <Id> --silent --accept-package-agreements --accept-source-agreements`. May trigger a UAC prompt — **Jaron approves it** (the AI can't click it). See `AUTHORIZATION.md`.
 
 ## Docker
-- **Status:** Installed — NOT yet integrated into this project
-- **Last verified:** Unverified
-- **Potential uses:** Run local services, isolated build environments, local API servers
-- **Next step:** Verify `docker --version`, identify if any workflow would benefit from containerization
+- **Status:** CLI installed (29.5.3); **daemon NOT running** (Docker Desktop not started)
+- **Implication:** no containers until Jaron starts Docker Desktop. Not currently part of any workflow.

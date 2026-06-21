@@ -1,34 +1,31 @@
 # WATCHLIST.md
 Last updated: 2026-06-20
-Updated by: Perplexity AI (initial seed)
+Updated by: Claude (corrected)
 
 This file tracks new tools, MCPs, model updates, TOS changes, and experiments to revisit.
 Anything that could change what's possible belongs here.
-Perplexity AI or Jaron updates this; Claude and Codex act on it.
 
 ---
 
-## Recently confirmed new capabilities
-| Capability | Status | Notes | Date confirmed |
-|---|---|---|---|
-| Unreal Engine MCP | Now available | Was not available in prior project — enables live editor control from Claude Code | 2026-06-20 |
-| Claude Code MCP Tool Search | Released | Claude can now load tools on demand instead of all at once — reduces token usage | 2026-01 |
-
----
+## Corrections to earlier assumptions (2026-06-20)
+| Item | Reality (verified) |
+|---|---|
+| "Unreal Engine MCP now available/active" | **Not present** in the Claude environment. Editor is driven via Python console + GUI automation. If an Unreal MCP is added later, re-verify and update CONNECTED_TOOLS. |
+| "gh confirmed working/authenticated" | `gh` installed but **NOT authenticated**. Git push/pull work via Credential Manager. |
+| "Docker installed — potential services" | Installed but **daemon not running**. |
 
 ## To verify / investigate
 | Item | Why it matters | Priority |
 |---|---|---|
-| Blender MCP | If a Blender MCP now exists, the headless CLI pipeline could be replaced or augmented with direct MCP control | High |
-| Docker MCP | Docker is installed — check if an MCP exists for containerized workflows | Medium |
-| Codex tool access | What local tools and MCPs does Codex have access to in its current environment? | High |
-| TOS for Claude Code re: local file access | Confirm no new restrictions on local filesystem operations | Medium |
-| Anthropic MCP roadmap updates | MCP is evolving fast — check for new connectors, auth changes, skill/tool patterns | Ongoing |
-| OpenAI Codex capability updates | Codex capabilities change — verify current tool access and limits | Ongoing |
-
----
+| Local collision chunk + radial controller | The proven-necessary next architecture layer (Proof 2c). Build it. | High |
+| Blender 5.1.2 Python API | Blender jumped to 5.x; re-verify the FBX authoring scripts still run | Medium |
+| Authenticate `gh` (or set GH_TOKEN) | Needed if we ever want `gh pr/issue/api`; not needed for push/pull | Low |
+| Unreal MCP (if one becomes available) | Would replace console+GUI driving with structured calls | Medium |
+| Blender MCP | Could augment the headless CLI pipeline | Low |
+| Docker (start daemon) | Only if a containerized workflow is actually needed | Low |
+| Codex environment parity | Confirm what tools/paths Codex actually has — may differ from this machine's Claude env | High |
 
 ## Rule
-When Perplexity or Jaron finds something new and relevant, add it here.
-When Claude or Codex starts a session, this file is NOT read by default — it is consulted from `AGENT_CAPABILITIES/` only when needed.
-But any agent doing research or hitting a limit SHOULD check WATCHLIST.md before concluding something is impossible.
+When Claude or Codex hits a limit or finishes research, check here before concluding
+something is impossible — and use ToolSearch to confirm what is actually loaded rather
+than trusting these notes. Record discoveries in CHANGELOG_CAPABILITIES.md.

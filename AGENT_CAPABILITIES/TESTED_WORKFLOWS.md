@@ -1,40 +1,47 @@
 # TESTED_WORKFLOWS.md
 Last updated: 2026-06-20
-Updated by: Perplexity AI (initial seed)
+Updated by: Claude (verified)
 
 This file records workflows that have been tested end to end and confirmed working.
 Do not mark a workflow as proven unless Jaron or a verifiable output confirmed it.
 
 ---
 
+## Drive the live Unreal editor via the Python console
+- **Status:** PROVEN 2026-06-20 (current project)
+- **Flow:** clipboard `py "C:/abs/path/script.py"` → click console field (Win32) → Ctrl+V → Enter. Script writes JSON to `Saved/` and prints `LogPython:` lines to `Saved/Logs/Kurearthis.log`; agent reads those.
+- **Verified by:** live scene audits, collision setup, line traces, actor spawns this session.
+- **Gotchas:** remote exec is off; editor must be open; use `hit.to_dict()` for HitResults.
+
+## Live scene verification
+- **Status:** PROVEN 2026-06-20
+- **Flow:** run `_authoring/live_scene_audit.py` → compare actor list/transforms with BUILDLOG → proceed or flag STATE DIVERGENCE.
+- **Verified by:** matched `PlanetaryProof` (ProofEarth @origin) to the log; re-verified clean after each Simulate.
+
+## C++ module build + reload
+- **Status:** PROVEN 2026-06-20
+- **Flow:** edit `Source/Kurearthis/*` → close editor → `Build.bat KurearthisEditor Win64 Development -Project=...` → reopen editor → new `unreal.<Class>` is available to Python.
+- **Verified by:** built `RadialGravityTestBody` and `FloatingOriginManager`, spawned them from Python.
+- **Gotchas:** needs .NET 4.8.1 SDK; Target.cs `BuildSettingsVersion.V7`; don't leave an uncompilable module in `.uproject` (bricks the editor with "Missing target file").
+
+## Run real physics via Simulate-In-Editor + read result
+- **Status:** PROVEN 2026-06-20
+- **Flow:** spawn physics actor + save level → play-mode menu → **Simulate** (GUI click) → wait → read `Saved/RadialGravityProof.*` → **Stop** (red button, Win32 click) → re-audit scene.
+- **Verified by:** the Chaos gravity runs (Proof 2b/2c).
+- **Gotchas:** `get_editor_world()` returns `<none>` while Simulate is active — stop first, then audit.
+
+## Install a dependency via winget
+- **Status:** PROVEN 2026-06-20 (.NET Framework 4.8.1 SDK)
+- **Flow:** `winget install --id <Id> --silent --accept-package-agreements --accept-source-agreements` → tell Jaron a UAC prompt may appear → Jaron approves → verify registry/files.
+
+## Commit / push loop
+- **Status:** PROVEN — commits live at the repo
+- **Flow:** edit → `git add` → `git commit` (Co-Authored-By trailer) → `git fetch` + `git rebase origin/main` → `git push`. Plain git (gh not authed).
+- **Gotchas:** revert auto-generated `Config/DefaultEngine.ini` (AndroidFileServer block) before committing.
+
 ## Blender → Unreal FBX pipeline
-- **Status:** Proven (prior project)
-- **Flow:** `blender --background --python _authoring/make_*.py` → exports FBX → `StaticMeshTools.import_file` in Unreal via MCP
-- **Model in:** METERS (Unreal auto-converts to cm on import)
-- **Export format:** FBX only — not glb
-- **Verified by:** Prior project sessions — multiple assets imported successfully
-- **Gotchas:** Blender Python API version must match installed Blender version
-
----
-
-## Claude Code + GitHub CLI commit/push loop
-- **Status:** Proven
-- **Flow:** Claude Code makes file changes → `git add` → `git commit -m "..." --trailer "Co-Authored-By: Claude <noreply@anthropic.com>"` → `git push`
-- **Verified by:** Live repo — commits appearing at https://github.com/JaronKBragg7337/Kurearthis
-- **Gotchas:** Always commit before risky changes to create rollback point
-
----
-
-## Unreal MCP live scene verification
-- **Status:** Proven (current project)
-- **Flow:** Enumerate actors via MCP → compare with BUILDLOG current state → proceed or flag STATE DIVERGENCE
-- **Verified by:** Caught ghost actors in prior project that caused undiagnosable bugs
-- **Gotchas:** Must have Unreal editor open; MCP server must be running
-
----
+- **Status:** Proven in prior project — NOT re-verified this session (Blender is now 5.1.2; check API)
+- **Flow:** `blender --background --python _authoring/make_*.py` → FBX (meters) → import via Unreal Python `AssetImportTask`.
 
 ## Claude + Codex cross-agent handoff
-- **Status:** Proven in prior project (Kurearthis predecessor)
-- **Flow:** One agent builds chunk → logs to BUILDLOG → commits → pushes → other agent reads BUILDLOG "Next" on startup
-- **Verified by:** Jaron confirmed loop ran end to end
-- **Gotchas:** Agents must ONLY share state through committed files — no assumed context from prior chats
+- **Status:** Proven — share state ONLY through committed files; read BUILDLOG "Next" on startup.
