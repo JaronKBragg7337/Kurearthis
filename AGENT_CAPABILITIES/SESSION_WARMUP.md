@@ -23,6 +23,7 @@ to use a capability, or when something that "should" work doesn't.
 | Docker (only if a workflow needs it) | `docker info` | `Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"`; wait ~60–90 s |
 | A dependency is missing | the tool errors "not found" | `winget install --id <Id> --silent ...` → Jaron approves UAC (see AUTHORIZATION.md) |
 | An MCP/tool seems absent | use ToolSearch with a keyword | it may be deferred/connecting, not missing — load it before assuming |
+| OCR/PDF stack | `python _authoring/document_stack_smoketest.py` | `scoop reset tesseract-languages`; restart the agent app if its inherited `TESSDATA_PREFIX` is stale |
 
 ## Principles
 1. **Refresh before re-architecting.** A 1-line restart beats a workaround that

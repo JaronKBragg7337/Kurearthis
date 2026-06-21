@@ -37,8 +37,9 @@ still applies — don't build the whole solar system to prove one fall).
 
 ## Unreal Engine operations
 Authorized without re-asking:
-- Drive the live editor via its Python console (remote execution is off; see the
-  console-driving method in agent memory) and via GUI automation when needed.
+- Drive the live editor primarily via localhost Python remote execution
+  (`_authoring/ue_remote.py`); use the Python console and GUI automation only as
+  fallbacks when needed.
 - Close, reopen, and rebuild the editor (kill `UnrealEditor` /
   `CrashReportClientEditor`, run `Build.bat`, relaunch) when a C++ module change
   requires it. Always re-verify the live scene on reopen (Crash/Restart law).

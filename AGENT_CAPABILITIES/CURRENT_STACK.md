@@ -1,6 +1,6 @@
 # CURRENT_STACK.md
-Last updated: 2026-06-20
-Updated by: Claude (verified)
+Last updated: 2026-06-21
+Updated by: Codex (verified)
 
 This file records the known operational stack — what is wired up, configured, and actively used.
 Update whenever a tool is added, removed, or changes status.
@@ -14,15 +14,14 @@ Update whenever a tool is added, removed, or changes status.
 | Codex (OpenAI) | Secondary builder — code and handoff work | OpenAI Codex interface | Active (env may differ; verify) |
 | Perplexity AI | Research, planning, repo/folder management | Web interface | Active |
 
-## How Unreal is actually driven — [CLAUDE-ENV] (CORRECTED 2026-06-20)
-No Unreal Engine MCP was loaded in this **Claude** session (Codex may differ —
-check your own tools). The live editor is controlled by:
+## How Unreal is actually driven
+No Unreal Engine MCP is needed for the proven workflow. The live editor is controlled by:
 | Mechanism | What it does | Status |
 |---|---|---|
-| Editor **Python console** (`py "abs/path.py"`) | Run authoring/audit/test scripts in the live editor; results written to `Saved/` and `Saved/Logs/Kurearthis.log` | Active, proven |
-| **GUI automation** (Win32 + Windows-MCP) | Focus window, click console/buttons, start/stop Simulate, dismiss dialogs | Active, proven |
+| Python remote execution (`_authoring/ue_remote.py`) | Run authoring/audit/test scripts in the live editor over localhost | Primary, proven |
+| Editor **Python console** (`py "abs/path.py"`) | Fallback script execution path | Active fallback |
+| **GUI automation** | Focus windows, handle dialogs, or drive unsupported UI-only actions | Available fallback; agent-specific tools vary |
 | **UnrealBuildTool** (`Build.bat`) | Compile the C++ module (editor closed) | Active, proven |
-| Unreal Python remote execution (network) | DISABLED in this project — not used | Off |
 
 ## System automation MCPs available to Claude Code
 | MCP | Use | Notes |
@@ -37,6 +36,8 @@ check your own tools). The live editor is controlled by:
 - Git 2.54.0 — push/pull work via Windows Credential Manager (HTTPS)
 - `gh` 2.93.0 — **authenticated** as JaronKBragg7337 (PRs/issues/api available). Push/pull still use plain `git`.
 - C++ build: VS Build Tools 2022 (MSVC 14.44) + .NET Framework 4.8.1 SDK
+- Package/runtime coverage: Scoop; Go 1.26.4; Rust 1.96.0; Java 21 LTS; Git LFS 3.7.1
+- Document inspection: Tesseract OCR (163 models), Poppler, qpdf, Ghostscript, ExifTool
 
 ## Version control
 - Platform: GitHub · Repo: https://github.com/JaronKBragg7337/Kurearthis · Branch: main · Public

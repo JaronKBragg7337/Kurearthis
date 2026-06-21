@@ -1,6 +1,6 @@
 # CONNECTED_TOOLS.md
-Last updated: 2026-06-20
-Updated by: Claude (verified)
+Last updated: 2026-06-21
+Updated by: Codex (verified)
 
 This file records tools that have been actively connected and tested in this project.
 For each tool: what it can do, what it cannot do, requirements, risks, and the best way to use it.
@@ -26,7 +26,7 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
   - Set collision (`body_setup.collision_trace_flag`), run line traces, set viewport camera
   - Start/stop **Simulate-In-Editor** to run real Chaos physics; read results from `Saved/`
 - **What it cannot do / gotchas:**
-  - No network Python remote execution (disabled) — must paste into the console bar
+  - This fallback is slower and UI-dependent; prefer remote execution whenever its socket is available
   - Editor must be OPEN; a new/changed C++ module needs the editor CLOSED to build, then reopened
   - `FHitResult` fields aren't direct attrs / `get_editor_property("blocking_hit")` fails — use `hit.to_dict()`
   - `unreal.SystemLibrary.line_trace_single` returns `None` on no-hit (not an empty struct)
@@ -59,3 +59,13 @@ For each tool: what it can do, what it cannot do, requirements, risks, and the b
 ## Docker
 - **Status:** CLI 29.5.3; **daemon running** (Docker Desktop started 2026-06-20; `docker info` OK). [MACHINE]
 - **Note:** if `docker info` ever fails again, the Desktop app just needs to be (re)started: `Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"` and wait ~60–90 s. Not yet part of any game-dev workflow.
+
+## OCR / PDF / metadata inspection — machine-level
+- **Status:** Active, proven 2026-06-21 from Codex.
+- **Tools:** Tesseract + 163 language models, Poppler (`pdfinfo`, `pdftotext`,
+  `pdftoppm`, etc.), qpdf, Ghostscript, and ExifTool.
+- **Verify:** `python _authoring/document_stack_smoketest.py` performs an exact
+  image OCR → PDF → validation/render → OCR round trip and metadata check.
+- **Gotcha:** after first install in an already-running agent app, refresh
+  `TESSDATA_PREFIX` from the user environment or restart the app. The smoke test
+  automatically falls back to Scoop's language-data path.

@@ -8,6 +8,23 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 
 ---
 
+## 2026-06-21 — Capability #9: OCR/PDF forensics + Codex machine parity
+- Changed by: Codex
+- Now POSSIBLE: machine-level OCR and document inspection with Tesseract 5.5.0
+  plus 163 language models, Poppler 26.02.0-0, qpdf 12.3.2, Ghostscript
+  10.07.1, and ExifTool 13.59. Future agents can read scanned images, extract or
+  render PDFs, validate PDF structure, and inspect media metadata from the CLI.
+- Verified: `_authoring/document_stack_smoketest.py` produced an exact OCR → PDF
+  render → OCR text match, qpdf found no syntax/stream errors, Ghostscript
+  rendered the page, and ExifTool read the resulting PNG metadata.
+- Also discovered and recorded: Scoop 0.5.3, Go 1.26.4, Rust/Cargo 1.96.0,
+  Temurin Java 21.0.11 LTS, and Git LFS 3.7.1 were already installed and usable.
+- Gotcha: already-running agent apps do not inherit Scoop's newly written
+  `TESSDATA_PREFIX`; restart or refresh from the user environment. The smoke test
+  automatically uses Scoop's language-data path when needed.
+- Source: live install, version checks, generated round-trip artifacts under
+  `Saved/CapabilityTests/document_stack/` (gitignored).
+
 ## 2026-06-21 — Capability #5: headless visual capture (Claude)
 - Changed by: Claude
 - Now POSSIBLE: capture a PNG of the live editor scene with NO GUI — `python _authoring/capture_view.py` (wraps `_authoring/capture_scene.py`). It renders the active viewport camera off-screen via `SceneCapture2D` → render target → PNG, so it works even when the editor window is minimized (an on-screen `HighResShot` does not). The agent reads the PNG to actually see the scene — visual evidence on every chunk instead of relying on Jaron's eyes for geometry checks.

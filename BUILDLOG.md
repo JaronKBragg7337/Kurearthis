@@ -10,9 +10,9 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 - **GitHub:** https://github.com/JaronKBragg7337/Kurearthis
 - **Git status:** Clean — Proof 2d (local patch + Chaos-force finding) committed
 - **Last verified good state:** After the 2d run + reloading the saved level, live audit = **5 actors**, no ghosts: `ProofEarth`, `GravityRestMarker`, `LocalSurfacePatch`, `ChaosGravityBody`, `FloatingOriginManager`. ProofEarth collision = QUERY_ONLY, still `Planet`-tagged; patch at X=637,090,000, scale (200,5000,5000)
-- **Tooling (built 2026-06-21):** Unreal **Python remote execution** is ON — drive the editor headless via `python _authoring/ue_remote.py --file/--stmt`. Scripted physics harness now takes a setup script: `python _authoring/run_physics_harness.py [s] --setup _authoring/<setup>.py` (no GUI Simulate). CI runs on every push. Asset toolkit installed (ImageMagick, Inkscape, Graphviz, Pandoc, SoX, ffmpeg) + data (pandas/numpy/matplotlib) + .NET8/CMake/Ninja. gh authed, Docker up. See `AGENT_CAPABILITIES/`.
-- **Current builder:** Claude
-- **Active blockers:** None — BUILD is PAUSED by Jaron. Capability session (2026-06-21) added: #5 headless visual capture (`capture_view.py`), #6 physics-settings dump (`dump_physics_settings.py`), #7 CI C++ static check + local compile wrapper (`check_cpp_static.py`, `build_editor.py`), #8 re-verified Blender→FBX→UE pipeline (`pipeline_smoketest.py`). See `AGENT_CAPABILITIES/`. Resume the build at "Next up #1" (custom radial-gravity integrator) when Jaron says go.
+- **Tooling (built 2026-06-21):** Unreal **Python remote execution** is ON — drive the editor headless via `python _authoring/ue_remote.py --file/--stmt`. Scripted physics harness now takes a setup script: `python _authoring/run_physics_harness.py [s] --setup _authoring/<setup>.py` (no GUI Simulate). CI runs on every push. Asset toolkit installed (ImageMagick, Inkscape, Graphviz, Pandoc, SoX, ffmpeg) + data (pandas/numpy/matplotlib) + .NET8/CMake/Ninja. OCR/PDF forensics are proven via `document_stack_smoketest.py` (Tesseract, Poppler, qpdf, Ghostscript, ExifTool). Scoop, Go, Rust, Java 21, and Git LFS are verified. gh authed, Docker up. See `AGENT_CAPABILITIES/`.
+- **Current builder:** Codex
+- **Active blockers:** None — BUILD is PAUSED by Jaron. Capability sessions (2026-06-21) added: #5 headless visual capture (`capture_view.py`), #6 physics-settings dump (`dump_physics_settings.py`), #7 CI C++ static check + local compile wrapper (`check_cpp_static.py`, `build_editor.py`), #8 re-verified Blender→FBX→UE pipeline (`pipeline_smoketest.py`), and #9 OCR/PDF forensics (`document_stack_smoketest.py`). See `AGENT_CAPABILITIES/`. Resume the build at "Next up #1" (custom radial-gravity integrator) when Jaron says go.
 
 ## Known issues
 - **ARCHITECTURE FINDINGS (Proof 2, see `PLANETARY_PROOF.md`):**
@@ -31,6 +31,13 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 4. Defer atmosphere/space (proof 3) and the second body (proof 4) until a pawn stands and moves.
 
 ## Recent entries
+
+### 2026-06-21 — Builder: Codex (capability session, not game build)
+- Did: Kept the Unreal build paused and expanded machine-level, cross-project inspection capability. Installed Tesseract OCR plus 163 language models, Poppler, qpdf, Ghostscript, and ExifTool through Scoop. Added `_authoring/document_stack_smoketest.py`. Audited Codex machine parity and discovered Scoop, Go, Rust, Java 21, and Git LFS were already installed but undocumented. Corrected stale capability docs that still claimed Unreal remote execution and standalone .NET were unavailable.
+- Verified: exact `KUREARTHIS OCR PROOF 58021` OCR match on a generated source image and again after ImageMagick PDF creation + Poppler rendering; qpdf reported no syntax/stream errors; Ghostscript rendered the PDF; ExifTool read PNG dimensions/type; 163 Tesseract models available. Live Unreal scene was not modified.
+- Files changed: `_authoring/document_stack_smoketest.py`, `AGENT_CAPABILITIES/**`, `AUTHORIZATION.md`, `PASTE_INTO_NEW_CHAT.txt`, `BUILDLOG.md`, `BUILDLOG_ARCHIVE.md`
+- Notes: Scoop writes `TESSDATA_PREFIX` to the user environment, but an already-running agent app does not inherit it. Restart/refresh fixes that; the smoke test automatically falls back to Scoop's language-data path. Build remains intentionally paused.
+- Next: Continue capability expansion in another small, verified bundle; when Jaron explicitly resumes the game build, implement the custom direct radial-gravity integrator.
 
 ### 2026-06-21 — Builder: Claude (Proof 2d — local patch + a hard Chaos-force finding)
 - Did: Ran "Next up #1" as one chunk, entirely head-less over remote execution (no GUI). (1) Built `LocalSurfacePatch` — a `/Engine/BasicShapes/Cube` scaled to a 5 km×200 m slab, placed tangent to the sphere at the equator with its top face at the surface radius and normal = radial up. (2) Set `ProofEarth` collision to **QueryOnly** so the giant mesh stops providing the glitchy contacts that ejected the body in 2c (it stays visual + line-traceable). (3) Released the existing `ARadialGravityTestBody` ~1 km above the patch with the floating origin active and ran it via the harness. (4) Added a near-origin control to isolate scale vs. setup bug. (5) Generalized `run_physics_harness.py` to take `--setup <script>`.
@@ -93,10 +100,3 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 - Files changed: `Kurearthis.uproject`, `.gitignore`, `Config/DefaultEngine.ini`, `Config/DefaultGame.ini`, `Config/DefaultInput.ini`, `Content/Foundation.umap`, `ASSETS_MANIFEST.md`, `BUILDLOG.md`
 - Notes: Initial bare project opened Unreal's unsaved 138-actor Open World template; it was audited, not saved, and replaced with the small Basic level. Local checkout was missing at session start and was restored from the public GitHub remote. No live/log divergence was found before work began.
 - Next: Add one grounded controllable player to `Foundation` and verify movement in Play-in-Editor
-
-### 2026-06-20 — Builder: Perplexity (kit setup)
-- Did: Created GitHub repo Kurearthis, pushed full project kit
-- Verified: Files pushed and visible on GitHub
-- Files changed: All kit files
-- Notes: Kit structured from lessons learned in prior SpaceYouLand project — lean logs, mandatory live-scene verification, SESSION INCOMPLETE protocol, log rotation to prevent token drain
-- Next: Jaron creates the Unreal project and starts first Claude/Codex session

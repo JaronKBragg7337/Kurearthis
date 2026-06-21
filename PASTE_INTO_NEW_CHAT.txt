@@ -21,6 +21,9 @@ KEY THINGS THAT ARE ALREADY TRUE (verified 2026-06-21):
 - CI runs on every push (.github/workflows/ci.yml). Commit via plain git; rebase onto origin/main before push.
 - Installed: UE 5.8, VS BuildTools 2022 + .NET 4.8.1 SDK (C++ builds), Blender 5.1,
   ImageMagick/Inkscape/Graphviz/Pandoc/SoX/ffmpeg, pandas/numpy/matplotlib, .NET8/CMake/Ninja, Docker.
+- Also installed: Scoop, Go, Rust, Java 21, Git LFS, and a proven OCR/PDF stack
+  (Tesseract + 163 models, Poppler, qpdf, Ghostscript, ExifTool). Verify with
+  `python _authoring/document_stack_smoketest.py`.
 
 WHERE THE GAME BUILD STANDS (from BUILDLOG / PLANETARY_PROOF.md):
 - Proofs 1 + 2a done (Earth-scale body; radial-gravity MODEL proven by a double-precision integrator).

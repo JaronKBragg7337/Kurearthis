@@ -1,6 +1,6 @@
 # TESTED_WORKFLOWS.md
-Last updated: 2026-06-20
-Updated by: Claude (verified)
+Last updated: 2026-06-21
+Updated by: Codex (verified)
 
 This file records workflows that have been tested end to end and confirmed working.
 Do not mark a workflow as proven unless Jaron or a verifiable output confirmed it.
@@ -70,3 +70,16 @@ Do not mark a workflow as proven unless Jaron or a verifiable output confirmed i
 
 ## Claude + Codex cross-agent handoff
 - **Status:** Proven — share state ONLY through committed files; read BUILDLOG "Next" on startup.
+
+## OCR + PDF forensics round trip
+- **Status:** PROVEN 2026-06-21.
+- **Flow:** `python _authoring/document_stack_smoketest.py` generates an image,
+  OCRs it with Tesseract, converts it to PDF, validates it with qpdf, inspects and
+  renders it with Poppler, OCRs the rendered page, renders it independently with
+  Ghostscript, and reads PNG metadata with ExifTool.
+- **Verified by:** exact text match (`KUREARTHIS OCR PROOF 58021`) before and
+  after the PDF round trip; qpdf reported no syntax/stream errors; 163 OCR
+  language models available; Ghostscript and ExifTool output verified.
+- **Gotcha:** a newly installed `TESSDATA_PREFIX` is not inherited by an already
+  running agent process. Restart the app, refresh it from the user environment,
+  or use the smoke test's automatic Scoop-path fallback.
