@@ -40,9 +40,11 @@ ARadialGravityPawn::ARadialGravityPawn()
 	SpringArm->TargetArmLength = 600.0f;
 	SpringArm->bUsePawnControlRotation = false;       // we orient everything manually
 	SpringArm->bDoCollisionTest = false;              // no probing the giant planet mesh
-	SpringArm->bInheritPitch = false;                 // pitch driven by CameraPitch
+	// Fully follow the pawn's orientation (its up = radial, which is NOT world +Z),
+	// then add the mouse look-pitch as a relative rotation on top.
+	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritYaw = true;
-	SpringArm->bInheritRoll = false;
+	SpringArm->bInheritRoll = true;
 	SpringArm->SetRelativeRotation(FRotator(CameraPitch, 0.0f, 0.0f));
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));

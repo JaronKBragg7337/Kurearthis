@@ -75,16 +75,21 @@ manager.set_actor_label(MANAGER_LABEL)
 manager.set_editor_property("Focus", pawn)
 
 # Lighting so the surface is visible (sun from the +X sky; black space beyond).
-if SUN_LABEL not in by_label:
+sun = by_label.get(SUN_LABEL)
+if sun is None:
     sun = actor_sub.spawn_actor_from_class(
         unreal.DirectionalLight, unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator(-30.0, 180.0, 0.0))
     sun.set_actor_label(SUN_LABEL)
-    sun.light_component.set_intensity(10.0)
-if SKY_LABEL not in by_label:
+sun.light_component.set_mobility(unreal.ComponentMobility.MOVABLE)  # dynamic; no lighting build
+sun.light_component.set_intensity(10.0)
+
+sky = by_label.get(SKY_LABEL)
+if sky is None:
     sky = actor_sub.spawn_actor_from_class(
         unreal.SkyLight, unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator())
     sky.set_actor_label(SKY_LABEL)
-    sky.light_component.set_intensity(0.6)
+sky.light_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+sky.light_component.set_intensity(0.6)
 
 level_sub.save_current_level()
 
