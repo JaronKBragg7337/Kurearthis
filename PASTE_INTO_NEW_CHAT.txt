@@ -8,7 +8,7 @@ READ IN THIS ORDER before doing anything:
 1. CHARTER.md            (project law — incl. No-shortcut law + Assumption law)
 2. AUTHORIZATION.md      (you MAY install deps / rebuild the editor; Jaron approves any UAC prompt you can't click)
 3. WORKFLOW.md           (how we operate; the capability-check rule)
-4. AGENT_CAPABILITIES/   (read SYSTEM_INVENTORY.md, CONNECTED_TOOLS.md, SESSION_WARMUP.md, USAGE_AND_LIMITS.md, AUTOMATION_AND_AGENTS.md — what's installed, how to drive things, what's been tried)
+4. AGENT_CAPABILITIES/   (read SYSTEM_INVENTORY.md, CONNECTED_TOOLS.md, SESSION_WARMUP.md, USAGE_AND_LIMITS.md, AUTOMATION_AND_AGENTS.md, and TESTED_WORKFLOWS.md + CHANGELOG_CAPABILITIES.md — what's installed, the PROVEN tool commands, and what's been tried)
 5. BUILDLOG.md           (current state, known issues, exact Next up)
 
 KEY THINGS THAT ARE ALREADY TRUE (verified 2026-06-21):
@@ -17,7 +17,14 @@ KEY THINGS THAT ARE ALREADY TRUE (verified 2026-06-21):
     python _authoring/ue_remote.py --stmt "import unreal; ..."
   (Editor must be open; it was restarted with bRemoteExecution=True.)
 - Run a scripted physics test (no GUI Simulate):
-    python _authoring/run_physics_harness.py 33
+    python _authoring/run_physics_harness.py 33 [--setup _authoring/<setup>.py]
+- SEE the live scene headless (off-screen render to PNG, works even minimized):
+    python _authoring/capture_view.py        # prints CAPTURE_OK <png>; read it
+- Dump physics settings / static-check C++ / compile / asset pipeline:
+    python _authoring/ue_remote.py --file _authoring/dump_physics_settings.py
+    python _authoring/check_cpp_static.py     # also runs in CI every push
+    python _authoring/build_editor.py         # compile KurearthisEditor (editor must be CLOSED)
+    python _authoring/pipeline_smoketest.py   # Blender->FBX->UE round-trip
 - CI runs on every push (.github/workflows/ci.yml). Commit via plain git; rebase onto origin/main before push.
 - Installed: UE 5.8, VS BuildTools 2022 + .NET 4.8.1 SDK (C++ builds), Blender 5.1,
   ImageMagick/Inkscape/Graphviz/Pandoc/SoX/ffmpeg, pandas/numpy/matplotlib, .NET8/CMake/Ninja, Docker.
