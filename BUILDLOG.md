@@ -12,7 +12,7 @@ Older history lives in `BUILDLOG_ARCHIVE.md`. Do not load that file at session s
 - **Last verified good state:** After the 2d run + reloading the saved level, live audit = **5 actors**, no ghosts: `ProofEarth`, `GravityRestMarker`, `LocalSurfacePatch`, `ChaosGravityBody`, `FloatingOriginManager`. ProofEarth collision = QUERY_ONLY, still `Planet`-tagged; patch at X=637,090,000, scale (200,5000,5000)
 - **Tooling (built 2026-06-21):** Unreal **Python remote execution** is ON — drive the editor headless via `python _authoring/ue_remote.py --file/--stmt`. Scripted physics harness now takes a setup script: `python _authoring/run_physics_harness.py [s] --setup _authoring/<setup>.py` (no GUI Simulate). CI runs on every push. Asset toolkit installed (ImageMagick, Inkscape, Graphviz, Pandoc, SoX, ffmpeg) + data (pandas/numpy/matplotlib) + .NET8/CMake/Ninja. gh authed, Docker up. See `AGENT_CAPABILITIES/`.
 - **Current builder:** Claude
-- **Active blockers:** None — the 2d build chunk verified the headless tooling works end-to-end; BUILD is now intentionally PAUSED by Jaron to expand capabilities. Resume at "Next up #1" when he says go.
+- **Active blockers:** None — BUILD is PAUSED by Jaron. Capability session (2026-06-21) added: #5 headless visual capture (`capture_view.py`), #6 physics-settings dump (`dump_physics_settings.py`), #7 CI C++ static check + local compile wrapper (`check_cpp_static.py`, `build_editor.py`), #8 re-verified Blender→FBX→UE pipeline (`pipeline_smoketest.py`). See `AGENT_CAPABILITIES/`. Resume the build at "Next up #1" (custom radial-gravity integrator) when Jaron says go.
 
 ## Known issues
 - **ARCHITECTURE FINDINGS (Proof 2, see `PLANETARY_PROOF.md`):**

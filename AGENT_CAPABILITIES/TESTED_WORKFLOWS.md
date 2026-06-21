@@ -63,8 +63,10 @@ Do not mark a workflow as proven unless Jaron or a verifiable output confirmed i
 - **Gotchas:** revert auto-generated `Config/DefaultEngine.ini` (AndroidFileServer block) before committing.
 
 ## Blender → Unreal FBX pipeline
-- **Status:** Proven in prior project — NOT re-verified this session (Blender is now 5.1.2; check API)
-- **Flow:** `blender --background --python _authoring/make_*.py` → FBX (meters) → import via Unreal Python `AssetImportTask`.
+- **Status:** PROVEN 2026-06-21 (re-verified end-to-end with Blender 5.1.2 + UE 5.8)
+- **Flow:** `python _authoring/pipeline_smoketest.py` — Blender authors a 2 m cube → FBX (meters) → UE `AssetImportTask` into a temp path → checks bounds → deletes the temp asset.
+- **Verified by:** the smoke-test imported at box-extent (100,100,100) cm = 200 cm (2 m preserved), temp content cleaned, FBX gitignored.
+- **Gotchas:** UE names the imported StaticMesh after the FBX **file stem**, not the mesh object name (so name the .fbx what you want the asset called). 1 m → 100 cm on import.
 
 ## Claude + Codex cross-agent handoff
 - **Status:** Proven — share state ONLY through committed files; read BUILDLOG "Next" on startup.

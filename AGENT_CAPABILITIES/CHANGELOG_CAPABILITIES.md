@@ -29,6 +29,12 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 - Verified: static check passes on the known-good module and its brace logic is unit-tested; `build_editor.py` correctly refused while the editor was open.
 - Source: live runs 2026-06-21.
 
+## 2026-06-21 — Capability #8: Blender→FBX→UE pipeline re-verified (Claude)
+- Changed by: Claude
+- Now CONFIRMED working with current tools: `python _authoring/pipeline_smoketest.py` round-trips Blender 5.1.2 → FBX (meters) → UE 5.8 import. A 2 m cube imported at box-extent (100,100,100) cm = 200 cm; temp asset auto-deleted, FBX gitignored.
+- Gotcha: UE names the imported StaticMesh after the FBX file stem, not the mesh object name.
+- Source: live run 2026-06-21.
+
 ## 2026-06-21 — Asset-production toolkit installed (Claude)
 - Changed by: Claude (Jaron requested; approved UAC where prompted)
 - Now POSSIBLE — the agent can produce real assets from scripts, not just placeholders:
