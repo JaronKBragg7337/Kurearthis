@@ -36,6 +36,7 @@ Do not trust this file blindly — verify live before relying on entries older t
 | VS Code | `%LOCALAPPDATA%\Programs\Microsoft VS Code` (`code` on PATH) | 2026-06-20 OK |
 | Docker | CLI 29.5.3 — **daemon running** (Docker Desktop started this session; `docker info` OK) | 2026-06-20 OK |
 | winget | 1.28.240 — works; can install deps (Jaron approves UAC prompts) | 2026-06-20 OK |
+| Dev CLIs | uv 0.11.17, jq 1.8.2, ripgrep 15.1.0, ffmpeg 8.1.1, 7-Zip — installed via winget (PATH refresh needed in-session) | 2026-06-21 OK |
 
 ## NOT present / corrected assumptions
 - **No standalone .NET (Core) SDK** on PATH — `dotnet --list-sdks` empty. UE uses a
