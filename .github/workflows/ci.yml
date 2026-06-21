@@ -1,0 +1,69 @@
+name: CI
+
+# Lightweight checks that run on GitHub-hosted runners (no Unreal engine present).
+# Catches broken authoring scripts, malformed project files, and accidentally
+# committed build artifacts. Full C++ compilation requires the engine and is done
+# locally (or via a self-hosted runner — see AGENT_CAPABILITIES/TESTED_WORKFLOWS.md).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python authoring scripts compile
+        run: |
+          fail=0
+          for f in _authoring/*.py; do
+            if python -m py_compile "$f"; then echo "OK   $f"; else echo "FAIL $f"; fail=1; fi
+          done
+          exit $fail
+
+      - name: .uproject is valid JSON and declares the C++ module
+        run: |
+          python - <<'PY'
+          import json, sys
+          d = json.load(open("Kurearthis.uproject"))
+          assert d.get("EngineAssociation") == "5.8", d.get("EngineAssociation")
+          mods = [m["Name"] for m in d.get("Modules", [])]
+          assert "Kurearthis" in mods, f"Kurearthis module missing; modules={mods}"
+          print("uproject OK; modules:", mods)
+          PY
+
+      - name: C++ module files present
+        run: |
+          set -e
+          for f in \
+            Source/Kurearthis.Target.cs \
+            Source/KurearthisEditor.Target.cs \
+            Source/Kurearthis/Kurearthis.Build.cs \
+            Source/Kurearthis/RadialGravityTestBody.h \
+            Source/Kurearthis/RadialGravityTestBody.cpp \
+            Source/Kurearthis/FloatingOriginManager.h \
+            Source/Kurearthis/FloatingOriginManager.cpp ; do
+            test -f "$f" && echo "present: $f"
+          done
+
+      - name: No build artifacts committed
+        run: |
+          bad=$(git ls-files | grep -E '^(Binaries|Intermediate|Saved|DerivedDataCache)/' || true)
+          if [ -n "$bad" ]; then echo "ERROR: build artifacts are tracked:"; echo "$bad"; exit 1; fi
+          echo "clean: no Binaries/Intermediate/Saved/DerivedDataCache tracked"
+
+      - name: Core project docs present
+        run: |
+          set -e
+          for f in CHARTER.md WORKFLOW.md BUILDLOG.md AUTHORIZATION.md ASSETS_MANIFEST.md PLANETARY_PROOF.md ; do
+            test -f "$f" && echo "present: $f"
+          done
