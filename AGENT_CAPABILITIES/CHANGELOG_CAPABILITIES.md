@@ -22,6 +22,13 @@ This tracks what became POSSIBLE or IMPOSSIBLE.
 - Limit found: `EditorPerformanceSettings` and the `b_substepping*` bools are not exposed to Python in 5.8 — read those from config ini, not the CDO.
 - Source: live run 2026-06-21.
 
+## 2026-06-21 — Capability #7: CI hardening for the C++ module (Claude)
+- Changed by: Claude
+- Now POSSIBLE: catch broken C++ at push time. (1) `_authoring/check_cpp_static.py` — engine-free structural checks (GENERATED_BODY present, `*.generated.h` is the last include, each `.cpp` includes its own header, brace balance, core Build.cs deps); added as a CI step so it runs free on the GitHub-hosted runner. (2) `_authoring/build_editor.py` — one-command real compile of `KurearthisEditor` wrapping the proven Build.bat flow, with a safety pre-check that refuses (exit 2) while the editor is open (it locks the module DLL).
+- Why not a full CI compile: GitHub-hosted runners have no engine (UE ~150 GB) and locally the editor locks `UnrealEditor-Kurearthis.dll`, so an automatic compile-on-push is impractical/disruptive. Static check + one-command local compile is the honest hardening; a self-hosted runner calling `build_editor.py` (push-to-main only, for the public-repo security caveat) remains the future option.
+- Verified: static check passes on the known-good module and its brace logic is unit-tested; `build_editor.py` correctly refused while the editor was open.
+- Source: live runs 2026-06-21.
+
 ## 2026-06-21 — Asset-production toolkit installed (Claude)
 - Changed by: Claude (Jaron requested; approved UAC where prompted)
 - Now POSSIBLE — the agent can produce real assets from scripts, not just placeholders:

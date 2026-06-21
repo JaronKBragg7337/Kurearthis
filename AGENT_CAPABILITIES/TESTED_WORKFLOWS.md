@@ -20,9 +20,15 @@ Do not mark a workflow as proven unless Jaron or a verifiable output confirmed i
 
 ## C++ module build + reload
 - **Status:** PROVEN 2026-06-20
-- **Flow:** edit `Source/Kurearthis/*` → close editor → `Build.bat KurearthisEditor Win64 Development -Project=...` → reopen editor → new `unreal.<Class>` is available to Python.
-- **Verified by:** built `RadialGravityTestBody` and `FloatingOriginManager`, spawned them from Python.
-- **Gotchas:** needs .NET 4.8.1 SDK; Target.cs `BuildSettingsVersion.V7`; don't leave an uncompilable module in `.uproject` (bricks the editor with "Missing target file").
+- **Flow:** edit `Source/Kurearthis/*` → close editor → `python _authoring/build_editor.py` (wraps `Build.bat KurearthisEditor Win64 Development -Project=...`) → reopen editor → new `unreal.<Class>` is available to Python.
+- **Verified by:** built `RadialGravityTestBody` and `FloatingOriginManager`, spawned them from Python. The `build_editor.py` wrapper's safety pre-check (refuses with exit 2 while the editor is open, since it locks `UnrealEditor-Kurearthis.dll`) verified 2026-06-21.
+- **Gotchas:** needs .NET 4.8.1 SDK; Target.cs `BuildSettingsVersion.V7`; don't leave an uncompilable module in `.uproject` (bricks the editor with "Missing target file"). The editor MUST be closed for the link step (DLL lock) — `build_editor.py` enforces this.
+
+## C++ static sanity check (CI + local, no engine)
+- **Status:** PROVEN 2026-06-21
+- **Flow:** `python _authoring/check_cpp_static.py` — flags missing `GENERATED_BODY()`, a missing/mis-ordered `*.generated.h` include, a `.cpp` not including its own header, unbalanced braces, and missing core `Build.cs` deps. Runs in CI (`.github/workflows/ci.yml`) on every push AND locally.
+- **Verified by:** passes on the known-good module (3 headers / 3 cpp); brace-stripping unit-tested to ignore braces in strings/comments and to catch real imbalance.
+- **Why:** GitHub-hosted runners have no engine (UE is ~150 GB) and locally the editor locks the module DLL, so a full CI compile isn't practical — this catches the common structural breakage at push time instead of at the next editor open. A true compile is `build_editor.py` (close the editor) or a future self-hosted runner.
 
 ## Scripted physics harness (NO GUI) — primary
 - **Status:** PROVEN 2026-06-20

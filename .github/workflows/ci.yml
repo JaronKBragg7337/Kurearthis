@@ -55,6 +55,9 @@ jobs:
             test -f "$f" && echo "present: $f"
           done
 
+      - name: C++ static sanity check (structure, no engine)
+        run: python _authoring/check_cpp_static.py
+
       - name: No build artifacts committed
         run: |
           bad=$(git ls-files | grep -E '^(Binaries|Intermediate|Saved|DerivedDataCache)/' || true)
