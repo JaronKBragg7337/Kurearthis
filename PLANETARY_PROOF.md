@@ -194,6 +194,23 @@ head-less by driving it +Y for ~15 s (`_authoring/setup_pawn_walk_proof.py`).
   swept. Horizontal obstacle collision / surface sliding is a follow-up for when the
   terrain has relief.
 
-**Status:** CHARTER proof #2 movement LOGIC is proven head-less. Remaining for proof
-#2 to be fully "playable": possession + a camera + input mappings + Jaron's feel test
-(human-judgment — see WORKFLOW). The math/architecture is done; the feel pass is next.
+**Status:** CHARTER proof #2 movement LOGIC is proven head-less.
+
+### 2g — playable: camera + input + possession (awaiting Jaron's feel test) — 2026-06-21
+Made the pawn playable. `ARadialGravityPawn` now has a third-person spring-arm camera
+(no collision test; pitch driven by mouse), steers a tangent-plane heading with the
+mouse, moves from WASD along that heading, and `AutoPossessPlayer=Player0`. Legacy
+`BindAxis` (MoveForward/MoveRight/Turn/LookUp) + `AxisMappings` in `DefaultInput.ini`
+(W/A/S/D + mouse). `_authoring/setup_pawn_play.py` leaves `PlanetaryProof` playable and
+LIT (added `SurfaceSun` DirectionalLight + `SurfaceSky` SkyLight — the proof map was
+unlit) and saved. A near-pawn editor capture confirms the pawn standing on the lit
+surface with black space beyond (edit-mode shows planetary-scale float jitter; Play
+rebases to origin via the floating origin, so it renders clean).
+
+- Verified head-less: movement logic unchanged after the rewrite (grounded, traveled,
+  `capsule_up_dot_radial=1.0` via the DebugDrive path).
+- **Needs Jaron (human-judgment, per WORKFLOW):** open `Content/PlanetaryProof`, press
+  Play — WASD to move, mouse to look — and judge feel + whether "up" reads correctly.
+- Risk to confirm in that test: legacy `BindAxis` firing under the project's default
+  `EnhancedInputComponent`. If WASD/mouse don't respond, the follow-up is a proper
+  Enhanced Input setup (Input Actions + Mapping Context).

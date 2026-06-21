@@ -2,6 +2,8 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -12,12 +14,11 @@
 ARadialGravityPawn::ARadialGravityPawn()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	// After the floating origin's TG_PrePhysics rebase for this frame.
-	PrimaryActorTick.TickGroup = TG_DuringPhysics;
-	AutoPossessPlayer = EAutoReceiveInput::Disabled;
+	PrimaryActorTick.TickGroup = TG_DuringPhysics;   // after the floating-origin rebase
+	AutoPossessPlayer = EAutoReceiveInput::Player0;   // PIE possesses the placed pawn
 
 	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	Capsule->InitCapsuleSize(50.0f, 100.0f);   // r=50 cm, half-height=1 m
+	Capsule->InitCapsuleSize(50.0f, 100.0f);
 	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Capsule->SetCollisionObjectType(ECC_Pawn);
 	Capsule->SetCollisionResponseToAllChannels(ECR_Block);
@@ -30,9 +31,23 @@ ARadialGravityPawn::ARadialGravityPawn()
 	if (CapsuleMesh.Succeeded())
 	{
 		VisMesh->SetStaticMesh(CapsuleMesh.Object);
-		// Engine cylinder is 100 cm tall, 50 cm radius; scale to ~2 m tall capsule body.
 		VisMesh->SetRelativeScale3D(FVector(1.0f, 1.0f, 2.0f));
 	}
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(Capsule);
+	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 80.0f));
+	SpringArm->TargetArmLength = 600.0f;
+	SpringArm->bUsePawnControlRotation = false;       // we orient everything manually
+	SpringArm->bDoCollisionTest = false;              // no probing the giant planet mesh
+	SpringArm->bInheritPitch = false;                 // pitch driven by CameraPitch
+	SpringArm->bInheritYaw = true;
+	SpringArm->bInheritRoll = false;
+	SpringArm->SetRelativeRotation(FRotator(CameraPitch, 0.0f, 0.0f));
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+	Camera->bUsePawnControlRotation = false;
 }
 
 FVector ARadialGravityPawn::GravityCenter() const
@@ -59,7 +74,15 @@ void ARadialGravityPawn::BeginPlay()
 
 	StartLocation = GetActorLocation();
 	const FVector C = GravityCenter();
-	StartRadialUp = (StartLocation - C).GetSafeNormal();
+	const FVector RadialUp = (StartLocation - C).GetSafeNormal();
+
+	// Initial heading: project world +Y onto the tangent plane (fallback +Z).
+	FVector Seed = FVector::RightVector;
+	if (FMath::Abs(FVector::DotProduct(Seed, RadialUp)) > 0.95)
+	{
+		Seed = FVector::UpVector;
+	}
+	ForwardDir = (Seed - FVector::DotProduct(Seed, RadialUp) * RadialUp).GetSafeNormal();
 
 	IFileManager::Get().Delete(*JsonPath, false, true, true);
 	FFileHelper::SaveStringToFile(
@@ -70,6 +93,8 @@ void ARadialGravityPawn::BeginPlay()
 
 void ARadialGravityPawn::MoveForwardInput(float Value) { PendingForward += Value; }
 void ARadialGravityPawn::MoveRightInput(float Value) { PendingRight += Value; }
+void ARadialGravityPawn::TurnInput(float Value) { PendingTurn += Value; }
+void ARadialGravityPawn::LookUpInput(float Value) { PendingLookUp += Value; }
 
 void ARadialGravityPawn::Tick(float DeltaSeconds)
 {
@@ -84,76 +109,75 @@ void ARadialGravityPawn::Tick(float DeltaSeconds)
 	FVector Loc = GetActorLocation();
 	const FVector RadialUp = (Loc - Center).GetSafeNormal();
 
-	// --- Desired tangential move direction (world space) --------------------
-	FVector DesiredDir = DebugDriveWorldDir;
-	if (DesiredDir.IsNearlyZero())
+	// Keep the heading in the tangent plane, then steer it with the mouse.
+	ForwardDir = (ForwardDir - FVector::DotProduct(ForwardDir, RadialUp) * RadialUp).GetSafeNormal();
+	if (!FMath::IsNearlyZero(PendingTurn))
 	{
-		// Build from input + current heading would need a camera; for now map
-		// forward/right to two fixed tangent basis directions.
-		const FVector Ref = FMath::Abs(RadialUp.Z) < 0.99 ? FVector::UpVector : FVector::ForwardVector;
-		const FVector East = FVector::CrossProduct(Ref, RadialUp).GetSafeNormal();
-		const FVector North = FVector::CrossProduct(RadialUp, East).GetSafeNormal();
-		DesiredDir = North * PendingForward + East * PendingRight;
+		ForwardDir = ForwardDir.RotateAngleAxis(PendingTurn * LookSensitivity, RadialUp).GetSafeNormal();
 	}
-	PendingForward = 0.0f;
-	PendingRight = 0.0f;
+	const FVector RightDir = FVector::CrossProduct(RadialUp, ForwardDir).GetSafeNormal();
 
-	// Project the desired direction onto the local tangent plane.
-	FVector TangentDir = DesiredDir - FVector::DotProduct(DesiredDir, RadialUp) * RadialUp;
-	TangentDir = TangentDir.GetSafeNormal();
+	// Desired tangential move from input (or the head-less debug drive).
+	FVector MoveDir = ForwardDir * PendingForward + RightDir * PendingRight;
+	if (!DebugDriveWorldDir.IsNearlyZero())
+	{
+		MoveDir = DebugDriveWorldDir;
+	}
+	MoveDir = MoveDir - FVector::DotProduct(MoveDir, RadialUp) * RadialUp;
+	PendingForward = PendingRight = PendingTurn = 0.0f;
 
-	// --- 1) Tangential (horizontal) move ------------------------------------
-	// Non-swept: a grounded capsule grazes the flat floor on a horizontal sweep and
-	// stops dead. The local patch is flat and obstacle-free, so we move directly;
-	// the real collision work (radial gravity grounding) stays swept below.
-	// Horizontal obstacle collision / surface sliding is a follow-up for when the
-	// terrain has relief.
+	// --- 1) Tangential move (non-swept on the flat patch) -------------------
+	const FVector TangentDir = MoveDir.GetSafeNormal();
 	if (!TangentDir.IsNearlyZero())
 	{
-		const FVector HDelta = TangentDir * (MoveSpeed * DeltaSeconds);
-		AddActorWorldOffset(HDelta, /*bSweep=*/false);
+		AddActorWorldOffset(TangentDir * (MoveSpeed * DeltaSeconds), /*bSweep=*/false);
 		const FVector MovedH = GetActorLocation() - Loc;
 		TangentialTraveled += (MovedH - FVector::DotProduct(MovedH, RadialUp) * RadialUp).Size();
 		Loc = GetActorLocation();
 	}
 
-	// --- 2) Radial gravity + grounding (vertical) swept move ----------------
-	VerticalVel -= GravityStrength * DeltaSeconds;          // accelerate toward center
-	const FVector VDelta = RadialUp * (VerticalVel * DeltaSeconds);
+	// --- 2) Radial gravity + grounding (swept) ------------------------------
+	VerticalVel -= GravityStrength * DeltaSeconds;
 	FHitResult VHit;
-	AddActorWorldOffset(VDelta, /*bSweep=*/true, &VHit);
+	AddActorWorldOffset(RadialUp * (VerticalVel * DeltaSeconds), /*bSweep=*/true, &VHit);
 	bGrounded = false;
 	if (VHit.bBlockingHit && FVector::DotProduct(VHit.ImpactNormal, RadialUp) > 0.5)
 	{
 		bGrounded = true;
 		if (VerticalVel < 0.0)
 		{
-			VerticalVel = 0.0;   // landed: stop falling
+			VerticalVel = 0.0;
 		}
 	}
 
-	// --- 3) Orient the capsule so its up tracks the radial direction --------
+	// --- 3) Orient capsule: up = radial, forward = heading ------------------
 	const FVector NewLoc = GetActorLocation();
 	const FVector UpNow = (NewLoc - Center).GetSafeNormal();
-	const FQuat Orient = FQuat::FindBetweenNormals(FVector::UpVector, UpNow);
-	SetActorRotation(Orient);
+	const FVector FwdTangent = (ForwardDir - FVector::DotProduct(ForwardDir, UpNow) * UpNow).GetSafeNormal();
+	SetActorRotation(FRotationMatrix::MakeFromZX(UpNow, FwdTangent).Rotator());
+
+	// --- 4) Camera pitch (mouse) --------------------------------------------
+	CameraPitch = FMath::Clamp(CameraPitch + PendingLookUp * LookSensitivity, -80.0f, 30.0f);
+	PendingLookUp = 0.0f;
+	if (SpringArm)
+	{
+		SpringArm->SetRelativeRotation(FRotator(CameraPitch, 0.0f, 0.0f));
+	}
 
 	const double Dist = (NewLoc - Center).Size();
-	const double UpDot = FVector::DotProduct(UpNow, RadialUp);   // ~1 across a tick
+	const double UpDot = FVector::DotProduct(UpNow, RadialUp);
 
 	LogAccum += DeltaSeconds;
 	if (LogAccum >= 0.25)
 	{
 		LogAccum = 0.0;
 		FFileHelper::SaveStringToFile(
-			FString::Printf(TEXT("t=%.2f worldLoc=(%.1f,%.1f,%.1f) dist=%.1f grounded=%d vVel=%.1f traveled=%.1f up=(%.4f,%.4f,%.4f)\n"),
-				Elapsed, NewLoc.X, NewLoc.Y, NewLoc.Z, Dist, bGrounded ? 1 : 0, VerticalVel,
-				TangentialTraveled, UpNow.X, UpNow.Y, UpNow.Z),
+			FString::Printf(TEXT("t=%.2f dist=%.1f grounded=%d vVel=%.1f traveled=%.1f up=(%.4f,%.4f,%.4f)\n"),
+				Elapsed, Dist, bGrounded ? 1 : 0, VerticalVel, TangentialTraveled, UpNow.X, UpNow.Y, UpNow.Z),
 			*LogPath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(),
 			EFileWrite::FILEWRITE_Append);
 	}
 
-	// Refresh the result file periodically so the harness reads the latest state.
 	ResultAccum += DeltaSeconds;
 	if (ResultAccum >= 0.5)
 	{
@@ -164,10 +188,8 @@ void ARadialGravityPawn::Tick(float DeltaSeconds)
 
 void ARadialGravityPawn::WriteResult(const FVector& Loc, double Dist, const FVector& RadialUp, double UpDot)
 {
-	const FVector Center = GravityCenter();
 	const double CapsuleHalf = Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 100.0;
 	const double HeightAboveSurface = Dist - SurfaceRadius - CapsuleHalf;
-	// up alignment of the capsule's actual up vs radial (proves re-orientation).
 	const FVector CapsuleUp = GetActorQuat().GetUpVector();
 	const double CapsuleUpDot = FVector::DotProduct(CapsuleUp, RadialUp);
 
@@ -202,5 +224,7 @@ void ARadialGravityPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ARadialGravityPawn::MoveForwardInput);
 		PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ARadialGravityPawn::MoveRightInput);
+		PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ARadialGravityPawn::TurnInput);
+		PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ARadialGravityPawn::LookUpInput);
 	}
 }
