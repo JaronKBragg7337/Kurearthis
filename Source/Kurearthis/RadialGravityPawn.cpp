@@ -10,6 +10,9 @@
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
 #include "HAL/FileManager.h"
+#include "Engine/World.h"
+#include "CollisionShape.h"
+#include "CollisionQueryParams.h"
 
 ARadialGravityPawn::ARadialGravityPawn()
 {
@@ -138,17 +141,43 @@ void ARadialGravityPawn::Tick(float DeltaSeconds)
 		Loc = GetActorLocation();
 	}
 
-	// --- 2) Radial gravity + grounding (swept) ------------------------------
-	VerticalVel -= GravityStrength * DeltaSeconds;
-	FHitResult VHit;
-	AddActorWorldOffset(RadialUp * (VerticalVel * DeltaSeconds), /*bSweep=*/true, &VHit);
-	bGrounded = false;
-	if (VHit.bBlockingHit && FVector::DotProduct(VHit.ImpactNormal, RadialUp) > 0.5)
+	// --- 2) Ground-follow (snap up/down) + gravity for real falls -----------
+	// A downward-only sweep cannot climb hills (it would sink into uphill terrain). So
+	// probe a capsule from StepUp ABOVE the pawn downward: if it finds ground within reach,
+	// snap the capsule to rest on it (handles uphill, flat, and small downhill); otherwise
+	// the pawn is genuinely airborne, so integrate radial gravity and sweep down to land.
+	const float CapHalf = Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 100.0f;
+	const float CapRadius = Capsule ? Capsule->GetScaledCapsuleRadius() : 50.0f;
+	const float StepUp = 8000.0f;     // detect ground up to 80 m above (max uphill reach)
+	const float SnapDown = 13000.0f;  // snap to ground up to ~50 m below; bigger drops fall
+	const FVector ProbeStart = Loc + RadialUp * StepUp;
+	const FVector ProbeEnd = Loc - RadialUp * SnapDown;
+	const FCollisionShape CapShape = FCollisionShape::MakeCapsule(CapRadius, CapHalf);
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(TerrainGround), false, this);
+	FHitResult GHit;
+	const bool bGroundHit = GetWorld()->SweepSingleByChannel(
+		GHit, ProbeStart, ProbeEnd, GetActorQuat(), ECC_WorldStatic, CapShape, Params);
+
+	if (bGroundHit && !GHit.bStartPenetrating)
 	{
+		// GHit.Location = capsule center at the moment it rests on the ground.
+		SetActorLocation(GHit.Location);
 		bGrounded = true;
-		if (VerticalVel < 0.0)
+		VerticalVel = 0.0;
+	}
+	else
+	{
+		bGrounded = false;
+		VerticalVel -= GravityStrength * DeltaSeconds;
+		FHitResult VHit;
+		AddActorWorldOffset(RadialUp * (VerticalVel * DeltaSeconds), /*bSweep=*/true, &VHit);
+		if (VHit.bBlockingHit && FVector::DotProduct(VHit.ImpactNormal, RadialUp) > 0.3)
 		{
-			VerticalVel = 0.0;
+			bGrounded = true;
+			if (VerticalVel < 0.0)
+			{
+				VerticalVel = 0.0;
+			}
 		}
 	}
 

@@ -49,7 +49,7 @@ planet.static_mesh_component.set_collision_enabled(unreal.CollisionEnabled.NO_CO
 
 # Replace any prior patch / grid / dynamic test actors / pawn / manager.
 for a in actors:
-    if a.get_actor_label() in (PATCH_LABEL, GRID_LABEL, "SweptGravityBody",
+    if a.get_actor_label() in (PATCH_LABEL, GRID_LABEL, "ProcTerrainTile", "SweptGravityBody",
                                "ChaosGravityBody", PAWN_LABEL, MANAGER_LABEL) \
        or a.get_actor_label().startswith("Tile_"):
         actor_sub.destroy_actor(a)

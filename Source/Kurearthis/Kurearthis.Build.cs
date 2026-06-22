@@ -12,6 +12,7 @@ public class Kurearthis : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
+			"ProceduralMeshComponent",
 		});
 	}
 }
