@@ -80,6 +80,7 @@ public:
 private:
 	double VerticalVel = 0.0;          // speed along radial up (cm/s); <0 = falling
 	bool bGrounded = false;
+	bool bDidInitialSnap = false;      // first grounding uses a large probe to land on relief
 	FVector ForwardDir = FVector::ZeroVector;   // heading in the tangent plane
 	float CameraPitch = -15.0f;        // spring-arm pitch (deg)
 	FVector StartLocation = FVector::ZeroVector;

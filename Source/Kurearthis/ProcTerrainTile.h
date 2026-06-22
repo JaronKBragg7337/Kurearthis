@@ -71,6 +71,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
 	int32 Octaves = 4;
 
+	/**
+	 * If true, generate over a fixed longitude/latitude cell (for ASurfaceTileManager
+	 * streaming) instead of the local tangent square. Adjacent cells then share EXACT edge
+	 * vertices (same lon/lat → same world point → same height) so the grid has no cracks.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
+	bool bUseLonLatCell = false;
+
+	/** Lon/lat cell corner + angular size (radians). Used when bUseLonLatCell. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
+	double CellLon0 = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
+	double CellLat0 = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
+	double CellAngularSize = 0.0;
+
 private:
 	FVector GravityCenter() const;
 };

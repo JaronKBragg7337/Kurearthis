@@ -1,6 +1,6 @@
 #include "SurfaceTileManager.h"
 
-#include "SurfacePatch.h"
+#include "ProcTerrainTile.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/RotationMatrix.h"
 #include "Misc/Paths.h"
@@ -70,7 +70,7 @@ void ASurfaceTileManager::BeginPlay()
 	}
 }
 
-ASurfacePatch* ASurfaceTileManager::SpawnTile(const FIntPoint& Cell)
+AProcTerrainTile* ASurfaceTileManager::SpawnTile(const FIntPoint& Cell)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -78,32 +78,34 @@ ASurfacePatch* ASurfaceTileManager::SpawnTile(const FIntPoint& Cell)
 		return nullptr;
 	}
 
+	const double DAng = TileSizeCm / SurfaceRadius;
 	const FVector Dir = CellDir(Cell);
 	const FVector Center = GravityCenter();
-	const double HalfThick = TileThicknessCm * 0.5;
-	const FVector Loc = Center + Dir * (SurfaceRadius - HalfThick);
-	const FTransform Xform(FRotationMatrix::MakeFromX(Dir).Rotator(), Loc);
+	const FVector Loc = Center + Dir * SurfaceRadius;   // cell-center surface point
+	const FTransform Xform(FRotationMatrix::MakeFromZ(Dir).Rotator(), Loc);
 
-	// Deferred spawn so bFixed is set BEFORE BeginPlay — the tile then never auto-grabs
-	// the Focus tag and never moves.
-	ASurfacePatch* Tile = World->SpawnActorDeferred<ASurfacePatch>(
-		ASurfacePatch::StaticClass(), Xform, this, nullptr,
+	// Deferred spawn so the lon/lat cell params are set BEFORE BeginPlay generates the
+	// mesh. Adjacent cells share exact edge vertices (same lon/lat) → no cracks; the
+	// world-space height source is continuous → no cliffs at borders.
+	AProcTerrainTile* Tile = World->SpawnActorDeferred<AProcTerrainTile>(
+		AProcTerrainTile::StaticClass(), Xform, this, nullptr,
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (!Tile)
 	{
 		return nullptr;
 	}
-	Tile->bFixed = true;
-	Tile->Focus = nullptr;
 	Tile->PlanetActor = PlanetActor;
 	Tile->SurfaceRadius = SurfaceRadius;
+	Tile->TileSizeCm = TileSizeCm;
+	Tile->Resolution = TileResolution;
+	Tile->HeightAmplitudeCm = HeightAmplitudeCm;
+	Tile->NoiseBaseWavelengthCm = NoiseBaseWavelengthCm;
+	Tile->bUseLonLatCell = true;
+	Tile->CellLon0 = Cell.X * DAng;
+	Tile->CellLat0 = Cell.Y * DAng;
+	Tile->CellAngularSize = DAng;
 
-	// Cube base is 100 cm; lateral extent covers the cell plus overlap to remove seams.
-	const double Lateral = (TileSizeCm * (1.0 + TileOverlap)) / 100.0;
-	const double Thick = TileThicknessCm / 100.0;
-	Tile->SetActorScale3D(FVector(Thick, Lateral, Lateral));
-
-	UGameplayStatics::FinishSpawningActor(Tile, Xform);
+	UGameplayStatics::FinishSpawningActor(Tile, Xform);   // BeginPlay -> Generate()
 
 #if WITH_EDITOR
 	Tile->SetActorLabel(FString::Printf(TEXT("Tile_%d_%d"), Cell.X, Cell.Y));
@@ -127,7 +129,7 @@ void ASurfaceTileManager::RebuildAround(const FIntPoint& Center)
 
 	// Unload tiles now outside the block (behind the player).
 	TArray<FIntPoint> ToRemove;
-	for (const TPair<FIntPoint, ASurfacePatch*>& Pair : ActiveTiles)
+	for (const TPair<FIntPoint, AProcTerrainTile*>& Pair : ActiveTiles)
 	{
 		if (!Desired.Contains(Pair.Key))
 		{
@@ -136,7 +138,7 @@ void ASurfaceTileManager::RebuildAround(const FIntPoint& Center)
 	}
 	for (const FIntPoint& Key : ToRemove)
 	{
-		ASurfacePatch* Tile = ActiveTiles.FindRef(Key);
+		AProcTerrainTile* Tile = ActiveTiles.FindRef(Key);
 		if (IsValid(Tile))
 		{
 			Tile->Destroy();
@@ -150,7 +152,7 @@ void ASurfaceTileManager::RebuildAround(const FIntPoint& Center)
 	{
 		if (!ActiveTiles.Contains(Key))
 		{
-			if (ASurfacePatch* Tile = SpawnTile(Key))
+			if (AProcTerrainTile* Tile = SpawnTile(Key))
 			{
 				ActiveTiles.Add(Key, Tile);
 			}
@@ -195,9 +197,9 @@ void ASurfaceTileManager::WriteState()
 		"  \"total_destroyed\": %d,\n"
 		"  \"current_cell\": [%d, %d],\n"
 		"  \"tile_size_cm\": %.1f,\n"
-		"  \"tile_overlap\": %.3f\n"
+		"  \"height_amplitude_cm\": %.1f\n"
 		"}\n"),
 		ActiveTiles.Num(), Expected, GridRadius, TotalSpawned, TotalDestroyed,
-		CurrentCell.X, CurrentCell.Y, TileSizeCm, TileOverlap);
+		CurrentCell.X, CurrentCell.Y, TileSizeCm, HeightAmplitudeCm);
 	FFileHelper::SaveStringToFile(Json, *StatePath);
 }

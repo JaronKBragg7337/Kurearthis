@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "SurfaceTileManager.generated.h"
 
-class ASurfacePatch;
+class AProcTerrainTile;
 
 /**
  * Streamed grid of FIXED surface tiles for seamless infinite roaming (PLANETARY_PROOF
@@ -63,17 +63,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileGrid")
 	int32 GridRadius = 1;
 
-	/** Slab thickness (cm). Default 200 m. */
+	/** Grid subdivisions per streamed terrain tile. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileGrid")
-	double TileThicknessCm = 20000.0;
+	int32 TileResolution = 32;
 
-	/** Lateral overlap between neighboring tiles (fraction of TileSizeCm) — kills seams. */
+	/** Peak radial terrain displacement (cm). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileGrid")
-	double TileOverlap = 0.15;
+	double HeightAmplitudeCm = 40000.0;
+
+	/** Largest noise-octave wavelength (cm). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileGrid")
+	double NoiseBaseWavelengthCm = 400000.0;
 
 private:
 	UPROPERTY()
-	TMap<FIntPoint, ASurfacePatch*> ActiveTiles;
+	TMap<FIntPoint, AProcTerrainTile*> ActiveTiles;
 
 	bool bHasCell = false;
 	FIntPoint CurrentCell = FIntPoint::ZeroValue;
@@ -85,6 +89,6 @@ private:
 	FIntPoint CellOf(const FVector& WorldPos) const;
 	FVector CellDir(const FIntPoint& Cell) const;
 	void RebuildAround(const FIntPoint& Center);
-	ASurfacePatch* SpawnTile(const FIntPoint& Cell);
+	AProcTerrainTile* SpawnTile(const FIntPoint& Cell);
 	void WriteState();
 };

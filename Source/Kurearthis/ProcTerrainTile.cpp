@@ -83,11 +83,23 @@ void AProcTerrainTile::Generate()
 	{
 		for (int32 j = 0; j <= N; ++j)
 		{
-			const double u = ((double)i / (double)N - 0.5) * TileSizeCm;
-			const double v = ((double)j / (double)N - 0.5) * TileSizeCm;
-			// Point in the tile's tangent plane, projected onto the sphere, displaced radially.
-			const FVector TangentPt = ActorLoc + Ax * u + Ay * v;
-			const FVector Dir = (TangentPt - Center).GetSafeNormal();
+			FVector Dir;
+			if (bUseLonLatCell)
+			{
+				// Fixed lon/lat grid: adjacent cells share exact edge vertices (no cracks).
+				const double Lon = CellLon0 + ((double)i / (double)N) * CellAngularSize;
+				const double Lat = CellLat0 + ((double)j / (double)N) * CellAngularSize;
+				const double CosLat = FMath::Cos(Lat);
+				Dir = FVector(CosLat * FMath::Cos(Lon), CosLat * FMath::Sin(Lon), FMath::Sin(Lat)).GetSafeNormal();
+			}
+			else
+			{
+				// Local tangent square (single-tile T2a mode).
+				const double u = ((double)i / (double)N - 0.5) * TileSizeCm;
+				const double v = ((double)j / (double)N - 0.5) * TileSizeCm;
+				const FVector TangentPt = ActorLoc + Ax * u + Ay * v;
+				Dir = (TangentPt - Center).GetSafeNormal();
+			}
 			const FVector SurfacePt = Center + Dir * SurfaceRadius;
 			const double H = SampleHeight(SurfacePt);
 			const FVector WorldP = Center + Dir * (SurfaceRadius + H);

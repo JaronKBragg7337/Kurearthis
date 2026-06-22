@@ -148,8 +148,15 @@ void ARadialGravityPawn::Tick(float DeltaSeconds)
 	// the pawn is genuinely airborne, so integrate radial gravity and sweep down to land.
 	const float CapHalf = Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 100.0f;
 	const float CapRadius = Capsule ? Capsule->GetScaledCapsuleRadius() : 50.0f;
-	const float StepUp = 8000.0f;     // detect ground up to 80 m above (max uphill reach)
-	const float SnapDown = 13000.0f;  // snap to ground up to ~50 m below; bigger drops fall
+	float StepUp = 8000.0f;     // detect ground up to 80 m above (max uphill reach)
+	float SnapDown = 13000.0f;  // snap to ground up to ~50 m below; bigger drops fall
+	if (!bDidInitialSnap)
+	{
+		// First grounding: a 3 km probe so the pawn lands on the relief on tick 1 no matter
+		// the spawn height (even if it spawned inside a hill) — no long free-fall at start.
+		StepUp = 300000.0f;
+		SnapDown = 300000.0f;
+	}
 	const FVector ProbeStart = Loc + RadialUp * StepUp;
 	const FVector ProbeEnd = Loc - RadialUp * SnapDown;
 	const FCollisionShape CapShape = FCollisionShape::MakeCapsule(CapRadius, CapHalf);
@@ -164,6 +171,7 @@ void ARadialGravityPawn::Tick(float DeltaSeconds)
 		SetActorLocation(GHit.Location);
 		bGrounded = true;
 		VerticalVel = 0.0;
+		bDidInitialSnap = true;
 	}
 	else
 	{
