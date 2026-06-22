@@ -84,6 +84,24 @@ namespace
 		}
 		return Dem;
 	}
+
+	// True if (lonDeg,latDeg) falls inside the loaded DEM grid bbox.
+	bool DEMContainsLonLat(double LonDeg, double LatDeg)
+	{
+		const FRealDEM& Dem = GetRealDEM();
+		if (!Dem.bValid)
+		{
+			return false;
+		}
+		const double Pi = 3.14159265358979323846;
+		const double LatR = FMath::DegreesToRadians(LatDeg);
+		const double TanLat = FMath::Tan(LatR);
+		const double AsinhLat = FMath::Loge(TanLat + FMath::Sqrt(TanLat * TanLat + 1.0));
+		const double Nn = (double)((int64)256 << Dem.Zoom);
+		const double Col = (LonDeg + 180.0) / 360.0 * Nn - Dem.OriginPxX;
+		const double Row = (1.0 - AsinhLat / Pi) / 2.0 * Nn - Dem.OriginPxY;
+		return (Col >= 0.0 && Col <= Dem.Width - 1 && Row >= 0.0 && Row <= Dem.Height - 1);
+	}
 }
 
 AProcTerrainTile::AProcTerrainTile()
@@ -194,7 +212,21 @@ void AProcTerrainTile::Generate()
 	const FVector Ay = X.GetUnitAxis(EAxis::Y);
 	const FVector ActorLoc = X.GetLocation();
 
-	const int32 N = FMath::Max(2, Resolution);
+	// Use a finer grid where real DEM data is active so fine terrain + narrow rivers show.
+	int32 EffRes = FMath::Max(2, Resolution);
+	{
+		const FVector CenterDir = (ActorLoc - Center).GetSafeNormal();
+		if (!CenterDir.IsNearlyZero())
+		{
+			const double LonD = FMath::RadiansToDegrees(FMath::Atan2(CenterDir.Y, CenterDir.X));
+			const double LatD = FMath::RadiansToDegrees(FMath::Asin(FMath::Clamp((double)CenterDir.Z, -1.0, 1.0)));
+			if (DEMContainsLonLat(LonD, LatD))
+			{
+				EffRes = FMath::Max(EffRes, DemResolution);
+			}
+		}
+	}
+	const int32 N = EffRes;
 	const int32 Side = N + 1;
 
 	TArray<FVector> Verts;

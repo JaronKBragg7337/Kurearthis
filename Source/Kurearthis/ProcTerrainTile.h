@@ -59,6 +59,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
 	int32 Resolution = 96;
 
+	/** Resolution for tiles inside the real-DEM region. Kept = base for now: a high value
+	 *  (e.g. 160 → ~31 m/quad, captures ~100 m rivers) is geometrically correct but streaming
+	 *  that many collision tris tanks the sim ~5x (T2d-4 finding) — fine real detail needs an
+	 *  LOD / async-cook / simplified-collision pass first. Adaptive scaffold kept for then. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
+	int32 DemResolution = 32;
+
 	/** Peak radial displacement of the height source (cm). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProcTerrain")
 	double HeightAmplitudeCm = 40000.0;   // 400 m
