@@ -22,6 +22,10 @@ namespace
 		double OriginPxX = 0.0;
 		double OriginPxY = 0.0;
 		TArray<float> Data;   // row-major, row 0 = north
+		// OSM water (T2d-3): same grid; 255 = water. Water cells flatten to WaterLevelCm.
+		bool bWater = false;
+		double WaterLevelCm = 0.0;
+		TArray<uint8> WaterMask;
 	};
 
 	const FRealDEM& GetRealDEM()
@@ -49,6 +53,31 @@ namespace
 						Dem.Data.SetNumUninitialized(N);
 						FMemory::Memcpy(Dem.Data.GetData(), &Bytes[36], N * 4);
 						Dem.bValid = true;
+					}
+				}
+			}
+
+			// Optional OSM water mask aligned to the same grid (T2d-3).
+			if (Dem.bValid)
+			{
+				const FString WPath = FPaths::ProjectContentDir() / TEXT("RealDEM/water_active.bin");
+				TArray<uint8> WB;
+				if (FFileHelper::LoadFileToArray(WB, *WPath) && WB.Num() >= 44)
+				{
+					int32 WMagic = 0, WW = 0, WH = 0;
+					FMemory::Memcpy(&WMagic, &WB[0], 4);
+					FMemory::Memcpy(&WW, &WB[12], 4);
+					FMemory::Memcpy(&WH, &WB[16], 4);
+					double WLevelM = 0.0;
+					FMemory::Memcpy(&WLevelM, &WB[36], 8);
+					const int64 WN = (int64)WW * (int64)WH;
+					if (WMagic == 0x4B574154 && WW == Dem.Width && WH == Dem.Height
+						&& WN > 0 && WB.Num() >= 44 + WN)
+					{
+						Dem.WaterMask.SetNumUninitialized(WN);
+						FMemory::Memcpy(Dem.WaterMask.GetData(), &WB[44], WN);
+						Dem.WaterLevelCm = WLevelM * 100.0;
+						Dem.bWater = true;
 					}
 				}
 			}
@@ -103,6 +132,16 @@ double AProcTerrainTile::SampleHeight(const FVector& WorldSurfacePoint) const
 			const double Row = Gy - Dem.OriginPxY;
 			if (Col >= 0.0 && Col <= Dem.Width - 1 && Row >= 0.0 && Row <= Dem.Height - 1)
 			{
+				// OSM water cells read as a flat water surface (T2d-3).
+				if (Dem.bWater)
+				{
+					const int32 Wc = FMath::Clamp((int32)FMath::RoundToDouble(Col), 0, Dem.Width - 1);
+					const int32 Wr = FMath::Clamp((int32)FMath::RoundToDouble(Row), 0, Dem.Height - 1);
+					if (Dem.WaterMask[(int64)Wr * Dem.Width + Wc] > 127)
+					{
+						return Dem.WaterLevelCm;
+					}
+				}
 				const int32 c0 = (int32)FMath::FloorToDouble(Col);
 				const int32 r0 = (int32)FMath::FloorToDouble(Row);
 				const int32 c1 = FMath::Min(c0 + 1, Dem.Width - 1);
