@@ -3,6 +3,59 @@
 #include "ProceduralMeshComponent.h"
 #include "KismetProceduralMeshLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/Paths.h"
+#include "Misc/FileHelper.h"
+
+// ---- Real-world DEM (T2d) -------------------------------------------------------------
+// A single shared elevation grid baked by _authoring/fetch_dem.py, loaded once from
+// Content/RealDEM/dem_active.bin. Where a sample's (lon,lat) falls inside the grid bbox,
+// the terrain uses REAL elevation; elsewhere it falls back to procedural noise.
+namespace
+{
+	struct FRealDEM
+	{
+		bool bTried = false;
+		bool bValid = false;
+		int32 Zoom = 0;
+		int32 Width = 0;
+		int32 Height = 0;
+		double OriginPxX = 0.0;
+		double OriginPxY = 0.0;
+		TArray<float> Data;   // row-major, row 0 = north
+	};
+
+	const FRealDEM& GetRealDEM()
+	{
+		static FRealDEM Dem;
+		if (!Dem.bTried)
+		{
+			Dem.bTried = true;
+			const FString Path = FPaths::ProjectContentDir() / TEXT("RealDEM/dem_active.bin");
+			TArray<uint8> Bytes;
+			if (FFileHelper::LoadFileToArray(Bytes, *Path) && Bytes.Num() >= 36)
+			{
+				int32 Magic = 0;
+				FMemory::Memcpy(&Magic, &Bytes[0], 4);
+				if (Magic == 0x4B44454D)   // 'KDEM'
+				{
+					FMemory::Memcpy(&Dem.Zoom, &Bytes[8], 4);
+					FMemory::Memcpy(&Dem.Width, &Bytes[12], 4);
+					FMemory::Memcpy(&Dem.Height, &Bytes[16], 4);
+					FMemory::Memcpy(&Dem.OriginPxX, &Bytes[20], 8);
+					FMemory::Memcpy(&Dem.OriginPxY, &Bytes[28], 8);
+					const int64 N = (int64)Dem.Width * (int64)Dem.Height;
+					if (N > 0 && Bytes.Num() >= 36 + N * 4)
+					{
+						Dem.Data.SetNumUninitialized(N);
+						FMemory::Memcpy(Dem.Data.GetData(), &Bytes[36], N * 4);
+						Dem.bValid = true;
+					}
+				}
+			}
+		}
+		return Dem;
+	}
+}
 
 AProcTerrainTile::AProcTerrainTile()
 {
@@ -31,6 +84,41 @@ FVector AProcTerrainTile::GravityCenter() const
 // DEFAULT height source; a real DEM/OSM source (T2d) replaces the body of this function.
 double AProcTerrainTile::SampleHeight(const FVector& WorldSurfacePoint) const
 {
+	// --- Real DEM where available (T2d) ---------------------------------------------
+	const FRealDEM& Dem = GetRealDEM();
+	if (Dem.bValid)
+	{
+		const FVector Dir = (WorldSurfacePoint - GravityCenter()).GetSafeNormal();
+		if (!Dir.IsNearlyZero())
+		{
+			const double Pi = 3.14159265358979323846;
+			const double LonDeg = FMath::RadiansToDegrees(FMath::Atan2(Dir.Y, Dir.X));
+			const double LatR = FMath::Asin(FMath::Clamp((double)Dir.Z, -1.0, 1.0));
+			const double TanLat = FMath::Tan(LatR);
+			const double AsinhLat = FMath::Loge(TanLat + FMath::Sqrt(TanLat * TanLat + 1.0)); // asinh
+			const double N = (double)((int64)256 << Dem.Zoom);
+			const double Gx = (LonDeg + 180.0) / 360.0 * N;
+			const double Gy = (1.0 - AsinhLat / Pi) / 2.0 * N;
+			const double Col = Gx - Dem.OriginPxX;
+			const double Row = Gy - Dem.OriginPxY;
+			if (Col >= 0.0 && Col <= Dem.Width - 1 && Row >= 0.0 && Row <= Dem.Height - 1)
+			{
+				const int32 c0 = (int32)FMath::FloorToDouble(Col);
+				const int32 r0 = (int32)FMath::FloorToDouble(Row);
+				const int32 c1 = FMath::Min(c0 + 1, Dem.Width - 1);
+				const int32 r1 = FMath::Min(r0 + 1, Dem.Height - 1);
+				const double Fc = Col - c0;
+				const double Fr = Row - r0;
+				auto At = [&](int32 R, int32 C) { return (double)Dem.Data[(int64)R * Dem.Width + C]; };
+				const double Top = At(r0, c0) * (1.0 - Fc) + At(r0, c1) * Fc;
+				const double Bot = At(r1, c0) * (1.0 - Fc) + At(r1, c1) * Fc;
+				const double Meters = Top * (1.0 - Fr) + Bot * Fr;
+				return Meters * 100.0;   // m -> cm
+			}
+		}
+	}
+
+	// --- Procedural fallback (fBm Perlin) -------------------------------------------
 	const double BaseFreq = (NoiseBaseWavelengthCm > 0.0) ? (1.0 / NoiseBaseWavelengthCm) : 1e-6;
 	double Sum = 0.0;
 	double Amp = 1.0;

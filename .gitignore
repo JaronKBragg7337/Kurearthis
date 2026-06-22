@@ -22,3 +22,6 @@ _*.png
 # OS
 .DS_Store
 Thumbs.db
+
+# Baked real-world DEM (regenerate via _authoring/fetch_dem.py; avoid redistributing source data)
+Content/RealDEM/
