@@ -147,17 +147,22 @@ void ASurfaceTileManager::RebuildAround(const FIntPoint& Center)
 		++TotalDestroyed;
 	}
 
-	// Load tiles ahead that are not present yet.
+	// Queue missing tiles (do NOT spawn all at once — that spikes the frame). Closest-to-
+	// focus first, so the cell under the pawn generates before the outer ring.
+	PendingCells.Reset();
 	for (const FIntPoint& Key : Desired)
 	{
 		if (!ActiveTiles.Contains(Key))
 		{
-			if (AProcTerrainTile* Tile = SpawnTile(Key))
-			{
-				ActiveTiles.Add(Key, Tile);
-			}
+			PendingCells.Add(Key);
 		}
 	}
+	PendingCells.Sort([Center](const FIntPoint& A, const FIntPoint& B)
+	{
+		const int32 DA = FMath::Abs(A.X - Center.X) + FMath::Abs(A.Y - Center.Y);
+		const int32 DB = FMath::Abs(B.X - Center.X) + FMath::Abs(B.Y - Center.Y);
+		return DA < DB;
+	});
 }
 
 void ASurfaceTileManager::Tick(float DeltaSeconds)
@@ -176,6 +181,26 @@ void ASurfaceTileManager::Tick(float DeltaSeconds)
 		CurrentCell = Cell;
 		bHasCell = true;
 		WriteState();
+	}
+
+	// Generate at most MaxSpawnsPerTick queued tiles this tick (mesh gen on the game thread,
+	// collision cooks async). Skip cells that drifted out of range or already exist.
+	int32 Spawned = 0;
+	while (PendingCells.Num() > 0 && Spawned < FMath::Max(1, MaxSpawnsPerTick))
+	{
+		const FIntPoint Key = PendingCells[0];
+		PendingCells.RemoveAt(0);
+		const bool bInRange = FMath::Abs(Key.X - CurrentCell.X) <= GridRadius
+			&& FMath::Abs(Key.Y - CurrentCell.Y) <= GridRadius;
+		if (!bInRange || ActiveTiles.Contains(Key))
+		{
+			continue;
+		}
+		if (AProcTerrainTile* Tile = SpawnTile(Key))
+		{
+			ActiveTiles.Add(Key, Tile);
+			++Spawned;
+		}
 	}
 }
 

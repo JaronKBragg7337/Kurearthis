@@ -111,7 +111,7 @@ AProcTerrainTile::AProcTerrainTile()
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh"));
 	RootComponent = Mesh;
 	Mesh->SetMobility(EComponentMobility::Movable);
-	Mesh->bUseAsyncCooking = false;                 // collision ready synchronously for the harness
+	Mesh->bUseAsyncCooking = true;                  // cook collision off the game thread (L1 LOD)
 	Mesh->bUseComplexAsSimpleCollision = true;      // so the capsule SWEEP grounds on the triangles
 	Mesh->SetCollisionProfileName(TEXT("BlockAll"));
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

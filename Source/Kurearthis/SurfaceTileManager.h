@@ -75,9 +75,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileGrid")
 	double NoiseBaseWavelengthCm = 400000.0;
 
+	/** Max tiles to generate per tick — spreads high-res mesh gen so a crossing/startup does
+	 *  not spike the frame (L1). Tiles cook collision async; the focus cell is generated first. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileGrid")
+	int32 MaxSpawnsPerTick = 1;
+
 private:
 	UPROPERTY()
 	TMap<FIntPoint, AProcTerrainTile*> ActiveTiles;
+
+	TArray<FIntPoint> PendingCells;   // cells queued to generate (closest-to-focus first)
 
 	bool bHasCell = false;
 	FIntPoint CurrentCell = FIntPoint::ZeroValue;
